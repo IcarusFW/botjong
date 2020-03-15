@@ -22,12 +22,16 @@ const findInObject = (obj, name) => {
         return (e === name);
     });
 }
+const toBoolean = (itm) => {
+    return Boolean(itm);
+}
+const removeFromArray = (obj, name) => {
+    return obj.filter(val => val !== name);
+}
 
 // set up environment object
 let $env = {
-    'waiting': [
-        'danzeeman', 'icarusfw', 'cartesian', 'decinym', 'nasty_wolverine', 'swordfam', 't4n3'
-    ],
+    'waiting': [],
     'playing': [],
     'tables': {}
 }
@@ -42,11 +46,23 @@ const $pervert = [
 const fn = {
     'join': function(target, data){
         // sign into waiting list to play
-        $client.say(target, `@${data.$name} has joined the match waiting list.`);
+        const $player = toBoolean(findInObject($env.waiting, data.$name));
+        if (!$player) {
+            $env.waiting.push(data.$name);
+            $client.say(target, `@${data.$name} has joined the match waiting list.`);
+        } else {
+            $client.say(target, `@${data.$name}, you're already on the waiting list.`);
+        }
     },
     'leave': function(target, data){
         // sign out of waiting list
-        $client.say(target, `@${data.$name} has left the match waiting list.`);
+        const $player = toBoolean(findInObject($env.waiting, data.$name));
+        if ($player) {
+            $env.waiting = removeFromArray($env.waiting, data.$name);
+            $client.say(target, `@${data.$name} left the match waiting list.`);
+        } else {
+            $client.say(target, `@${data.$name}, you're not on the waiting list.`);
+        }
     },
     'waiting': function(target, data){
         // check waiting lists
@@ -125,7 +141,7 @@ function onMessageHandler(target, context, msg, self) {
     // if the command is !batjong, execute bot functions
     if ($data.$cmd === '!batjong' && $data.$opt !== null) { 
         fn[$data.$opt](target, $data);
-    } else {
+    } else if ($data.$cmd === '!batjong' && $data.$opt === null) {
         $client.say(target, `BatJong : I am the night.`);
     }
 
