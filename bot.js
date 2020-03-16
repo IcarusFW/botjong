@@ -43,6 +43,10 @@ const $pervert = [
     'https://www.pixiv.net/tags/R-18'
 ]
 
+const $messages = {
+    'adminOnly': `BatJong : That's an admin-only command.`
+}
+
 const fn = {
     'join': function(target, data){
         // sign into waiting list to play
@@ -107,7 +111,7 @@ const fn = {
         } 
 
         if (!data.$me){
-            $client.say(target, `BatJong : That's an admin-only command.`);
+            $client.say(target, $messages.adminOnly);
         }
     },
     'remove': function(target, data){
@@ -127,14 +131,14 @@ const fn = {
         } 
 
         if (!data.$me){
-            $client.say(target, `BatJong : That's an admin-only command.`);
+            $client.say(target, $messages.adminOnly);
         }
     },
     'close': function(target, data){
         // ADMIN ONLY - close a waiting table (or all tables)
 
         if (!data.$me){
-            $client.say(target, `BatJong : That's an admin-only command.`);
+            $client.say(target, $messages.adminOnly);
         }
     },
     'reset': function(target, data){
@@ -147,28 +151,28 @@ const fn = {
         }
 
         if (!data.$me){
-            $client.say(target, `BatJong : That's an admin-only command.`);
+            $client.say(target, $messages.adminOnly);
         }
     },
     'notify': function(target, data){
         // ADMIN ONLY - send a notification to a waiting table
 
         if (!data.$me){
-            $client.say(target, `BatJong : That's an admin-only command.`);
+            $client.say(target, $messages.adminOnly);
         }
     },
     'start': function(target, data){
         // ADMIN ONLY - restart command watching
 
         if (!data.$me){
-            $client.say(target, `BatJong : That's an admin-only command.`);
+            $client.say(target, $messages.adminOnly);
         }
     },
     'stop': function(target, data){
         // ADMIN ONLY - stop command watching (excluding !batjong start)
 
         if (!data.$me){
-            $client.say(target, `BatJong : That's an admin-only command.`);
+            $client.say(target, $messages.adminOnly);
         }
     }
 }
