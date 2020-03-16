@@ -99,7 +99,7 @@ const fn = {
                 $list += (i !== 0) ? ', ' : '';
                 $list += $env.waiting[i];
             }
-            if ($list === '') { $list = '[no one]'; }
+            if ($list === '') { $list = '[no players]'; }
             $client.say(target, replaceString($messages.waitingList, '{list}', $list));
         }
         
