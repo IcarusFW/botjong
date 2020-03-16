@@ -3,10 +3,10 @@ A Twitch chatbot for organising riichi mahjong matches
 
 ## Setting up
 This bot is set up using NodeJS, and therefore requires a local instance of Node to be run. As usual, `cmd` into the project root and execute `npm install` to install all dependencies, then tell Node to execute `bot.js`.
-For this to be functional, a `.env` file with the parameters `BOT_USERNAME`, `OAUTH_TOKEN`, `CHANNEL_NAME` and `ME` is required in the root of the project. This repo will not have one committed to code for personal data security purposes.
+For this to be functional, a `.env` file with the parameters `BOT_USERNAME`, `BOT_COMMAND`, `OAUTH_TOKEN`, `CHANNEL_NAME` and `ME` is required in the root of the project. This repo will not have one committed to code for personal data security purposes.
 
 ## Commands
-All Botjong commands start with `!batjong` followed by a request and an optional target. 
+All Botjong commands start with the command listed in `.env.BOT_COMMAND` followed by a request and an optional target. 
 
 ### Public Commands
 - `join` : adds your name to the waiting list

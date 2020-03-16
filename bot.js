@@ -241,13 +241,13 @@ function onMessageHandler(target, context, msg, self) {
     if (self) { return; }
 
     // if the command is called, check validity of option and execute function if valid
-    if ($data.$cmd === '!batjong' && $data.$opt !== null) {
+    if ($data.$cmd === process.env.BOT_COMMAND && $data.$opt !== null) {
         if (typeof fn[$data.$opt] !== 'undefined') {
             fn[$data.$opt](target, $data);
         } else {
             $client.say(target, $messages.commandIncorrect);
         }
-    } else if ($data.$cmd === '!batjong' && $data.$opt === null) {
+    } else if ($data.$cmd === process.env.BOT_COMMAND && $data.$opt === null) {
         $client.say(target, `BatJong : I am the night.`);
     }
 
