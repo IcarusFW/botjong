@@ -132,18 +132,44 @@ const fn = {
     },
     'close': function(target, data){
         // ADMIN ONLY - close a waiting table (or all tables)
+
+        if (!data.$me){
+            $client.say(target, `BatJong : That's an admin-only command.`);
+        }
     },
     'reset': function(target, data){
         // ADMIN ONLY - reset both wait list and wait tables to init state
+        if (!data.$me){
+            $env.waiting = [];
+            $env.playing = [];
+            $env.tables = {};
+            $client.say(target, `BatJong : All active lists have been reset.`);
+        }
+
+        if (!data.$me){
+            $client.say(target, `BatJong : That's an admin-only command.`);
+        }
     },
     'notify': function(target, data){
         // ADMIN ONLY - send a notification to a waiting table
+
+        if (!data.$me){
+            $client.say(target, `BatJong : That's an admin-only command.`);
+        }
     },
     'start': function(target, data){
         // ADMIN ONLY - restart command watching
+
+        if (!data.$me){
+            $client.say(target, `BatJong : That's an admin-only command.`);
+        }
     },
     'stop': function(target, data){
         // ADMIN ONLY - stop command watching (excluding !batjong start)
+
+        if (!data.$me){
+            $client.say(target, `BatJong : That's an admin-only command.`);
+        }
     }
 }
 
