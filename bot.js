@@ -28,12 +28,15 @@ const toBoolean = (itm) => {
 const removeFromArray = (obj, name) => {
     return obj.filter(val => val !== name);
 }
+const replaceString = (itm, element, name) => {
+  return itm.replace(element, name);
+};
 
 // set up environment object
 let $env = {
     'waiting': [],
-    'playing': [],
-    'tables': {}
+    'ready': {},
+    'playing': {}
 }
 
 const $pervert = [
@@ -44,7 +47,23 @@ const $pervert = [
 ]
 
 const $messages = {
-    'adminOnly': `BatJong : That's an admin-only command.`
+    'adminOnly': "BatJong That's an admin-only command.",
+    'joinedList': "BatJong @{name} has joined the waiting list.",
+    'onList': "BatJong @{name}, you're already on the waiting list.",
+    'leftList': "BatJong @{name} has left the waiting list.",
+    'notOnList': "BatJong @{name}, you're not on the waiting list.",
+    'waitingTotal': "BatJong There are currently {total} players waiting for a match.",
+    'waitingList': "BatJong Players awaiting a match - {list}",
+    'reset': "BatJong All active lists have been reset.",
+    'adminAdd': "Batjong @{name} has been added to the waiting list.",
+    'adminAddName': "BatJong You need to provide a player name to add to the list.",
+    'adminOnList': "BatJong @{name} is already on the waiting list.",
+    'adminRemove': "Batjong @{name} has been removed from the waiting list.",
+    'adminRemoveName': "BatJong You need to provide a player name to remove from the list.",
+    'adminNotOnList': "BatJong @{name} is not on the waiting list.",
+    'commandIncorrect': "BatJong I don't recognise that command...",
+    'optionIncorrect': "BatJong I don't recognise that option...",
+    'targetIncorrect': "BatJong I don't recognise that parameter...",
 }
 
 const fn = {
@@ -53,9 +72,9 @@ const fn = {
         const $player = toBoolean(findInObject($env.waiting, data.$name));
         if (!$player) {
             $env.waiting.push(data.$name);
-            $client.say(target, `@${data.$name} has joined the match waiting list.`);
+            $client.say(target, replaceString($messages.joinedList, '{name}', data.$name));
         } else {
-            $client.say(target, `@${data.$name}, you're already on the waiting list.`);
+            $client.say(target, replaceString($messages.onList, '{name}', data.$name));
         }
     },
     'leave': function(target, data){
@@ -63,36 +82,44 @@ const fn = {
         const $player = toBoolean(findInObject($env.waiting, data.$name));
         if ($player) {
             $env.waiting = removeFromArray($env.waiting, data.$name);
-            $client.say(target, `@${data.$name} left the match waiting list.`);
+            $client.say(target, replaceString($messages.leftList, '{name}', data.$name));
         } else {
-            $client.say(target, `@${data.$name}, you're not on the waiting list.`);
+            $client.say(target, replaceString($messages.notOnList, '{name}', data.$name));
         }
     },
-    'waiting': function(target, data){
+    'list': function(target, data){
         // check waiting lists
         if (data.$tgt === '-total') {
-            $client.say(target, `BatJong : There are currently ${$env.waiting.length} players awaiting a match.`);
+            $client.say(target, replaceString($messages.waitingTotal, '{total}', $env.waiting.length));
         }
         
-        if (data.$tgt === '-list') {
-            let $temp = '';
+        if (data.$tgt === '-waiting') {
+            let $list = '';
             for (var i = 0; i < $env.waiting.length; i++) {
-                $temp += (i !== 0) ? ', ' : '';
-                $temp += $env.waiting[i];
+                $list += (i !== 0) ? ', ' : '';
+                $list += $env.waiting[i];
             }
-            $client.say(target, `BatJong : Players awaiting a match - ${$temp}`);
+            if ($list === '') { $list = '[no one]'; }
+            $client.say(target, replaceString($messages.waitingList, '{list}', $list));
         }
         
-        if (data.$tgt === '-tables') {
+        if (data.$tgt === '-ready') {
+            //$client.say(target, `BatJong : Hash generated - ${getHash()}`);
+        }
+
+        if (data.$tgt === '-playing') {
             //$client.say(target, `BatJong : Hash generated - ${getHash()}`);
         } 
         
         if (data.$tgt === null) {
-            $client.say(target, `BatJong : I don't recognise that option...`);
+            $client.say(target, $messages.targetIncorrect);
         }
     },
     'play': function(target, data){
         // init game start and move to active tables
+    },
+    'lewds': function(target, data) {
+        // post lewds lmao
     },
     'add': function(target, data){
         // ADMIN ONLY - manually add a player to the waiting list
@@ -100,14 +127,14 @@ const fn = {
             const $player = toBoolean(findInObject($env.waiting, data.$tgt));
             if (!$player) {
                 $env.waiting.push(data.$tgt);
-                $client.say(target, `@${data.$tgt} has been added to the match waiting list.`);
+                $client.say(target, replaceString($messages.adminAdd, '{name}', data.$tgt));
             } else {
-                $client.say(target, `@${data.$tgt} is already on the waiting list.`);
+                $client.say(target, replaceString($messages.adminOnList, '{name}', data.$tgt));
             }
         }
 
         if (data.$me && data.$tgt === null) {
-            $client.say(target, `BatJong : You need to provide a player name to add to the list.`);
+            $client.say(target, $messages.adminAddName);
         } 
 
         if (!data.$me){
@@ -120,14 +147,14 @@ const fn = {
             const $player = toBoolean(findInObject($env.waiting, data.$tgt));
             if ($player) {
                 $env.waiting = removeFromArray($env.waiting, data.$tgt);
-                $client.say(target, `@${data.$tgt} has been removed from the match waiting list.`);
+                $client.say(target, replaceString($messages.adminRemove, '{name}', data.$tgt));
             } else {
-                $client.say(target, `@${data.$tgt} is not on the waiting list.`);
+                $client.say(target, replaceString($messages.adminNotOnList, '{name}', data.$tgt));
             }
         }
 
         if (data.$me && data.$tgt === null) {
-            $client.say(target, `BatJong : You need to provide a player name to remove from the list.`);
+            $client.say(target, $messages.adminRemoveName);
         } 
 
         if (!data.$me){
@@ -136,7 +163,6 @@ const fn = {
     },
     'close': function(target, data){
         // ADMIN ONLY - close a waiting table (or all tables)
-
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
         }
@@ -147,7 +173,7 @@ const fn = {
             $env.waiting = [];
             $env.playing = [];
             $env.tables = {};
-            $client.say(target, `BatJong : All active lists have been reset.`);
+            $client.say(target, $messages.reset);
         }
 
         if (!data.$me){
@@ -156,20 +182,37 @@ const fn = {
     },
     'notify': function(target, data){
         // ADMIN ONLY - send a notification to a waiting table
-
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
         }
     },
     'start': function(target, data){
         // ADMIN ONLY - restart command watching
-
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
         }
     },
     'stop': function(target, data){
         // ADMIN ONLY - stop command watching (excluding !batjong start)
+
+        if (!data.$me){
+            $client.say(target, $messages.adminOnly);
+        }
+    },
+    'generate': function(target, data) {
+        // ADMIN ONLY - generate waiting tables using the current active player list
+
+        if (!data.$me){
+            $client.say(target, $messages.adminOnly);
+        }
+    },
+    'log': function(target, data) {
+        // ADMIN ONLY - output all tracking lists to console
+        if (data.$me){
+            console.log('msg', [data.$cmd, data.$opt, data.$tgt]);
+            console.log('env', $env);
+            console.log('data', data);
+        }
 
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
@@ -198,9 +241,13 @@ function onMessageHandler(target, context, msg, self) {
     if (self) { return; }
 
     // if the command is !batjong, execute bot functions
-    if ($data.$cmd === '!batjong' && $data.$opt !== null) { 
-        fn[$data.$opt](target, $data);
-    } else if ($data.$cmd === '!batjong' && $data.$opt === null) {
+    if ($data.$cmd === '!botjong' && $data.$opt !== null) {
+        if (typeof fn[$data.$opt] !== 'undefined') {
+            fn[$data.$opt](target, $data);
+        } else {
+            $client.say(target, $messages.commandIncorrect);
+        }
+    } else if ($data.$cmd === '!botjong' && $data.$opt === null) {
         $client.say(target, `BatJong : I am the night.`);
     }
 
