@@ -62,8 +62,8 @@ const $messages = {
     'adminRemoveName': "BatJong You need to provide a player name to remove from the list.",
     'adminNotOnList': "BatJong @{name} is not on the waiting list.",
     'commandIncorrect': "BatJong I don't recognise that command...",
-    'optionIncorrect': "BatJong I don't recognise that option...",
-    'targetIncorrect': "BatJong I don't recognise that parameter...",
+    'optionIncorrect': "BatJong I don't know that option...",
+    'targetIncorrect': "BatJong I don't understand that request...",
 }
 
 const fn = {
@@ -169,7 +169,7 @@ const fn = {
     },
     'reset': function(target, data){
         // ADMIN ONLY - reset both wait list and wait tables to init state
-        if (!data.$me){
+        if (data.$me){
             $env.waiting = [];
             $env.playing = [];
             $env.tables = {};
