@@ -240,14 +240,14 @@ function onMessageHandler(target, context, msg, self) {
     // Ignore messages from the bot
     if (self) { return; }
 
-    // if the command is !batjong, execute bot functions
-    if ($data.$cmd === '!botjong' && $data.$opt !== null) {
+    // if the command is called, check validity of option and execute function if valid
+    if ($data.$cmd === '!batjong' && $data.$opt !== null) {
         if (typeof fn[$data.$opt] !== 'undefined') {
             fn[$data.$opt](target, $data);
         } else {
             $client.say(target, $messages.commandIncorrect);
         }
-    } else if ($data.$cmd === '!botjong' && $data.$opt === null) {
+    } else if ($data.$cmd === '!batjong' && $data.$opt === null) {
         $client.say(target, `BatJong : I am the night.`);
     }
 

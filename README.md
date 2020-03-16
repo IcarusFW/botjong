@@ -6,7 +6,7 @@ This bot is set up using NodeJS, and therefore requires a local instance of Node
 For this to be functional, a `.env` file with the parameters `BOT_USERNAME`, `OAUTH_TOKEN`, `CHANNEL_NAME` and `ME` is required in the root of the project. This repo will not have one committed to code for personal data security purposes.
 
 ## Commands
-All Botjong commands start with `!botjong` followed by a request and an optional target. 
+All Botjong commands start with `!batjong` followed by a request and an optional target. 
 
 ### Public Commands
 - `join` : adds your name to the waiting list
