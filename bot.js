@@ -68,16 +68,22 @@ const fn = {
         // check waiting lists
         if (data.$tgt === '-total') {
             $client.say(target, `BatJong : There are currently ${$env.waiting.length} players awaiting a match.`);
-        } else if (data.$tgt === '-list') {
+        }
+        
+        if (data.$tgt === '-list') {
             let $temp = '';
             for (var i = 0; i < $env.waiting.length; i++) {
                 $temp += (i !== 0) ? ', ' : '';
                 $temp += $env.waiting[i];
             }
             $client.say(target, `BatJong : Players awaiting a match - ${$temp}`);
-        } else if (data.$tgt === '-tables') {
-            $client.say(target, `BatJong : Hash generated - ${getHash()}`);
-        } else {
+        }
+        
+        if (data.$tgt === '-tables') {
+            //$client.say(target, `BatJong : Hash generated - ${getHash()}`);
+        } 
+        
+        if (data.$tgt === null) {
             $client.say(target, `BatJong : I don't recognise that option...`);
         }
     },
@@ -87,7 +93,13 @@ const fn = {
     'add': function(target, data){
         // ADMIN ONLY - manually add a player to the waiting list
         if (data.$me && data.$tgt !== null) {
-            $client.say(target, `BatJong : Oh, hello admin.`);
+            const $player = toBoolean(findInObject($env.waiting, data.$tgt));
+            if (!$player) {
+                $env.waiting.push(data.$tgt);
+                $client.say(target, `@${data.$tgt} has been added to the match waiting list.`);
+            } else {
+                $client.say(target, `@${data.$tgt} is already on the waiting list.`);
+            }
         }
 
         if (data.$me && data.$tgt === null) {
@@ -100,6 +112,23 @@ const fn = {
     },
     'remove': function(target, data){
         // ADMIN ONLY - manually remove a player (or all) from the waiting list
+        if (data.$me && data.$tgt !== null) {
+            const $player = toBoolean(findInObject($env.waiting, data.$tgt));
+            if ($player) {
+                $env.waiting = removeFromArray($env.waiting, data.$tgt);
+                $client.say(target, `@${data.$tgt} has been removed from the match waiting list.`);
+            } else {
+                $client.say(target, `@${data.$tgt} is not on the waiting list.`);
+            }
+        }
+
+        if (data.$me && data.$tgt === null) {
+            $client.say(target, `BatJong : You need to provide a player name to remove from the list.`);
+        } 
+
+        if (!data.$me){
+            $client.say(target, `BatJong : That's an admin-only command.`);
+        }
     },
     'close': function(target, data){
         // ADMIN ONLY - close a waiting table (or all tables)
