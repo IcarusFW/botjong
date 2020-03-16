@@ -55,7 +55,7 @@ const $messages = {
     'waitingTotal': "BatJong There are currently {total} players waiting for a match.",
     'waitingList': "BatJong Players awaiting a match - {list}",
     'reset': "BatJong All active lists have been reset.",
-    'adminAdd': "Batjong @{name} has been added to the waiting list.",
+    'adminAdd': "BatJong @{name} has been added to the waiting list.",
     'adminAddName': "BatJong You need to provide a player name to add to the list.",
     'adminOnList': "BatJong @{name} is already on the waiting list.",
     'adminRemove': "Batjong @{name} has been removed from the waiting list.",
