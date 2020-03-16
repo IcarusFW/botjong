@@ -3,7 +3,7 @@ A Twitch chatbot for organising riichi mahjong matches
 
 ## Setting up
 This bot is set up using NodeJS, and therefore requires a local instance of Node to be run. As usual, `cmd` into the project root and execute `npm install` to install all dependencies, then tell Node to execute `bot.js`.
-For this to be functional, a `.env` file with the parameters `BOT_USERNAME`, `OAUTH_TOKEN`, `CHANNEL_NAME` and `ME` are required in the root of the project. This repo will not have one committed to code for personal data security purposes.
+For this to be functional, a `.env` file with the parameters `BOT_USERNAME`, `OAUTH_TOKEN`, `CHANNEL_NAME` and `ME` is required in the root of the project. This repo will not have one committed to code for personal data security purposes.
 
 ## Commands
 All Botjong commands start with `!botjong` followed by a request and an optional target. 
@@ -33,4 +33,4 @@ All Botjong commands start with `!botjong` followed by a request and an optional
 
 Note that the bot has a `setInterval()` where it will automatically execute `generate` and `notify` to create tables if there are enough players in the waiting list, along with `remove [name]` to keep the list itself clean. The active games list will have an Epoch timestamp set on each generated table, and each active table will be purged once a set amount of time has elapsed, to keep things clean.
 
-The intention for this bot is to track any waiting players and automatically create a table ID once there is enough to make a table. As tehre is no way to hook into MJS to create a table and assign player IDs, all table creation must be handled manually - the bot is for tracking players and games only. Players _must_ reregister for a match whenever they are ready, and `leave` if they no longer wish to be tracked for a match.
+The intention for this bot is to track any waiting players and automatically create a table ID once there is enough to make a table. As there is no way to hook into MJS to create a table and assign player IDs, all table creation must be handled manually - the bot is for tracking players and games only. Players _must_ reregister for a match whenever they are ready, and `leave` if they no longer wish to be tracked for a match.
