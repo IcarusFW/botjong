@@ -49,41 +49,43 @@ const $messages = {
     'targetIncorrect': "BatJong I don't understand that request...",
 }
 
-const isMe = (name) => { return (name === process.env.ME) ? true : false; }
-const getHash = () => Math.random().toString(36).substr(2, 5);
-const findInObject = (obj, name) => {
-    return obj.find(function(e){
-        return (e === name);
-    });
-}
-const toBoolean = (itm) => {
-    return Boolean(itm);
-}
-const removeFromArray = (obj, name) => {
-    return obj.filter(val => val !== name);
-}
-const replaceString = (itm, obj) => {
-    let $temp = itm;
-    for (let key in obj) {
-        $temp = $temp.replace(`{${key}}`, obj[key]);
-    }
-    return $temp;
-}
-const randomSelect = (arr) => {
-    return arr[Math.floor(Math.random() * arr.length)]
-}
-const generateTables = () => {
-    if ($env.waiting.length >= 4) {
-        let $table = [];
-        for (var i = 1; i <= 4; i++) {
-            var $name = randomSelect($env.waiting);
-            $table.push($name);
-            $env.waiting = removeFromArray($env.waiting, $name);
+const utils = {
+    isMe: (name) => { return (name === process.env.ME) ? true : false; },
+    getHash: () => { Math.random().toString(36).substr(2, 5); },
+    findInObject: (obj, name) => {
+        return obj.find(function(e){
+            return (e === name);
+        });
+    },
+    toBoolean: (itm) => {
+        return Boolean(itm);
+    },
+    removeFromArray: (obj, name) => {
+        return obj.filter(val => val !== name);
+    },
+    replaceString: (itm, obj) => {
+        let $temp = itm;
+        for (let key in obj) {
+            $temp = $temp.replace(`{${key}}`, obj[key]);
+        }
+        return $temp;
+    },
+    randomSelect: (arr) => {
+        return arr[Math.floor(Math.random() * arr.length)]
+    },
+    generateTables: () => {
+        if ($env.waiting.length >= 4) {
+            let $table = [];
+            for (var i = 1; i <= 4; i++) {
+                var $name = utils.randomSelect($env.waiting);
+                $table.push($name);
+                $env.waiting = utils.removeFromArray($env.waiting, $name);
 
-            if (i === 4) {
-                var $hash = getHash();
-                $env.ready[$hash] = $table;
-                generateTables();
+                if (i === 4) {
+                    var $hash = utils.getHash();
+                    $env.ready[$hash] = $table;
+                    utils.generateTables();
+                }
             }
         }
     }
@@ -92,32 +94,32 @@ const generateTables = () => {
 const fn = {
     'join': (target, data) => {
         // sign into waiting list to play
-        const $player = toBoolean(findInObject($env.waiting, data.$name));
+        const $player = utils.toBoolean(utils.findInObject($env.waiting, data.$name));
         let $data = { 'name': data.$name }
         if (!$player) {
             $env.waiting.push(data.$name);
             $data.total = $env.waiting.length;
-            $client.say(target, replaceString($messages.joinedList, $data));
+            $client.say(target, utils.replaceString($messages.joinedList, $data));
         } else {
-            $client.say(target, replaceString($messages.onList, $data));
+            $client.say(target, utils.replaceString($messages.onList, $data));
         }
     },
     'leave': (target, data) => {
         // sign out of waiting list
-        const $player = toBoolean(findInObject($env.waiting, data.$name));
+        const $player = utils.toBoolean(utils.findInObject($env.waiting, data.$name));
         let $data = { 'name': data.$name }
         if ($player) {
-            $env.waiting = removeFromArray($env.waiting, data.$name);
+            $env.waiting = utils.removeFromArray($env.waiting, data.$name);
             $data.total = $env.waiting.length;
-            $client.say(target, replaceString($messages.leftList, $data));
+            $client.say(target, utils.replaceString($messages.leftList, $data));
         } else {
-            $client.say(target, replaceString($messages.notOnList, $data));
+            $client.say(target, utils.replaceString($messages.notOnList, $data));
         }
     },
     'list': (target, data) => {
         // check waiting lists
         if (data.$tgt === '-total') {
-            $client.say(target, replaceString($messages.waitingTotal, {'total': $env.waiting.length}));
+            $client.say(target, utils.replaceString($messages.waitingTotal, {'total': $env.waiting.length}));
         }
         
         if (data.$tgt === '-waiting') {
@@ -127,7 +129,7 @@ const fn = {
                 $list += $env.waiting[i];
             }
             if ($list === '') { $list = '[no players]'; }
-            $client.say(target, replaceString($messages.waitingList, {'list': $list}));
+            $client.say(target, utils.replaceString($messages.waitingList, {'list': $list}));
         }
         
         if (data.$tgt === '-ready') {
@@ -151,14 +153,14 @@ const fn = {
     'add': (target, data) => {
         // ADMIN ONLY - manually add a player to the waiting list
         if (data.$me && data.$tgt !== null) {
-            const $player = toBoolean(findInObject($env.waiting, data.$tgt));
+            const $player = utils.toBoolean(utils.findInObject($env.waiting, data.$tgt));
             let $data = { 'name': data.$tgt }
             if (!$player) {
                 $env.waiting.push(data.$tgt);
                 $data.total = $env.waiting.length;
-                $client.say(target, replaceString($messages.adminAdd, $data));
+                $client.say(target, utils.replaceString($messages.adminAdd, $data));
             } else {
-                $client.say(target, replaceString($messages.adminOnList, $data));
+                $client.say(target, utils.replaceString($messages.adminOnList, $data));
             }
         }
 
@@ -173,14 +175,14 @@ const fn = {
     'remove': (target, data) => {
         // ADMIN ONLY - manually remove a player (or all) from the waiting list
         if (data.$me && data.$tgt !== null) {
-            const $player = toBoolean(findInObject($env.waiting, data.$tgt));
+            const $player = utils.toBoolean(utils.findInObject($env.waiting, data.$tgt));
             let $data = { 'name': data.$tgt }
             if ($player) {
-                $env.waiting = removeFromArray($env.waiting, data.$tgt);
+                $env.waiting = utils.removeFromArray($env.waiting, data.$tgt);
                 $data.total = $env.waiting.length;
-                $client.say(target, replaceString($messages.adminRemove, $data));
+                $client.say(target, utils.replaceString($messages.adminRemove, $data));
             } else {
-                $client.say(target, replaceString($messages.adminNotOnList, $data));
+                $client.say(target, utils.replaceString($messages.adminNotOnList, $data));
             }
         }
 
@@ -233,7 +235,7 @@ const fn = {
     'generate': (target, data) => {
         // ADMIN ONLY - generate waiting tables using the current active player list
         if (data.$me) {
-            generateTables();
+            utils.generateTables();
         }
 
         if (!data.$me){
@@ -269,7 +271,7 @@ function onMessageHandler(target, context, msg, self) {
         $tgt: $msg[2] || null
     }
     // additional personal check
-    $data.$me = isMe($data.$name);
+    $data.$me = utils.isMe($data.$name);
 
     // Ignore messages from the bot
     if (self) { return; }
