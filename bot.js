@@ -15,27 +15,6 @@ const $client = new $tmi.client($opts);
 // Connect to Twitch:
 $client.connect();
 
-const isMe = (name) => { return (name === process.env.ME) ? true : false; }
-const getHash = () => Math.random().toString(36).substr(2, 5);
-const findInObject = (obj, name) => {
-    return obj.find(function(e){
-        return (e === name);
-    });
-}
-const toBoolean = (itm) => {
-    return Boolean(itm);
-}
-const removeFromArray = (obj, name) => {
-    return obj.filter(val => val !== name);
-}
-const replaceString = (itm, obj) => {
-    let $temp = itm;
-    for (let key in obj) {
-        $temp = $temp.replace(`{${key}}`, obj[key]);
-    }
-    return $temp;
-};
-
 // set up environment object
 let $env = {
     'waiting': [],
@@ -70,8 +49,48 @@ const $messages = {
     'targetIncorrect': "BatJong I don't understand that request...",
 }
 
+const isMe = (name) => { return (name === process.env.ME) ? true : false; }
+const getHash = () => Math.random().toString(36).substr(2, 5);
+const findInObject = (obj, name) => {
+    return obj.find(function(e){
+        return (e === name);
+    });
+}
+const toBoolean = (itm) => {
+    return Boolean(itm);
+}
+const removeFromArray = (obj, name) => {
+    return obj.filter(val => val !== name);
+}
+const replaceString = (itm, obj) => {
+    let $temp = itm;
+    for (let key in obj) {
+        $temp = $temp.replace(`{${key}}`, obj[key]);
+    }
+    return $temp;
+}
+const randomSelect = (arr) => {
+    return arr[Math.floor(Math.random() * arr.length)]
+}
+const generateTables = () => {
+    if ($env.waiting.length >= 4) {
+        let $table = [];
+        for (var i = 1; i <= 4; i++) {
+            var $name = randomSelect($env.waiting);
+            $table.push($name);
+            $env.waiting = removeFromArray($env.waiting, $name);
+
+            if (i === 4) {
+                var $hash = getHash();
+                $env.ready[$hash] = $table;
+                generateTables();
+            }
+        }
+    }
+}
+
 const fn = {
-    'join': function(target, data){
+    'join': (target, data) => {
         // sign into waiting list to play
         const $player = toBoolean(findInObject($env.waiting, data.$name));
         let $data = { 'name': data.$name }
@@ -83,7 +102,7 @@ const fn = {
             $client.say(target, replaceString($messages.onList, $data));
         }
     },
-    'leave': function(target, data){
+    'leave': (target, data) => {
         // sign out of waiting list
         const $player = toBoolean(findInObject($env.waiting, data.$name));
         let $data = { 'name': data.$name }
@@ -95,7 +114,7 @@ const fn = {
             $client.say(target, replaceString($messages.notOnList, $data));
         }
     },
-    'list': function(target, data){
+    'list': (target, data) => {
         // check waiting lists
         if (data.$tgt === '-total') {
             $client.say(target, replaceString($messages.waitingTotal, {'total': $env.waiting.length}));
@@ -123,13 +142,13 @@ const fn = {
             $client.say(target, $messages.targetIncorrect);
         }
     },
-    'play': function(target, data){
+    'play': (target, data) => {
         // init game start and move to active tables
     },
-    'lewds': function(target, data) {
+    'lewds': (target, data) => {
         // post lewds lmao
     },
-    'add': function(target, data){
+    'add': (target, data) => {
         // ADMIN ONLY - manually add a player to the waiting list
         if (data.$me && data.$tgt !== null) {
             const $player = toBoolean(findInObject($env.waiting, data.$tgt));
@@ -151,7 +170,7 @@ const fn = {
             $client.say(target, $messages.adminOnly);
         }
     },
-    'remove': function(target, data){
+    'remove': (target, data) => {
         // ADMIN ONLY - manually remove a player (or all) from the waiting list
         if (data.$me && data.$tgt !== null) {
             const $player = toBoolean(findInObject($env.waiting, data.$tgt));
@@ -173,13 +192,13 @@ const fn = {
             $client.say(target, $messages.adminOnly);
         }
     },
-    'close': function(target, data){
+    'close': (target, data) => {
         // ADMIN ONLY - close a waiting table (or all tables)
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
         }
     },
-    'reset': function(target, data){
+    'reset': (target, data) => {
         // ADMIN ONLY - reset both wait list and wait tables to init state
         if (data.$me){
             $env.waiting = [];
@@ -192,33 +211,33 @@ const fn = {
             $client.say(target, $messages.adminOnly);
         }
     },
-    'notify': function(target, data){
+    'notify': (target, data) => {
         // ADMIN ONLY - send a notification to a waiting table
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
         }
     },
-    'start': function(target, data){
+    'start': (target, data) => {
         // ADMIN ONLY - restart command watching
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
         }
     },
-    'stop': function(target, data){
+    'stop': (target, data) => {
         // ADMIN ONLY - stop command watching (excluding !batjong start)
 
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
         }
     },
-    'generate': function(target, data) {
+    'generate': (target, data) => {
         // ADMIN ONLY - generate waiting tables using the current active player list
 
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
         }
     },
-    'log': function(target, data) {
+    'log': (target, data) => {
         // ADMIN ONLY - output all tracking lists to console
         if (data.$me){
             console.log('msg', [data.$cmd, data.$opt, data.$tgt]);
