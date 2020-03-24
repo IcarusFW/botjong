@@ -28,8 +28,12 @@ const toBoolean = (itm) => {
 const removeFromArray = (obj, name) => {
     return obj.filter(val => val !== name);
 }
-const replaceString = (itm, element, name) => {
-  return itm.replace(element, name);
+const replaceString = (itm, obj) => {
+    let $temp = itm;
+    for (let key in obj) {
+        $temp = $temp.replace(`{${key}}`, obj[key]);
+    }
+    return $temp;
 };
 
 // set up environment object
@@ -48,17 +52,17 @@ const $pervert = [
 
 const $messages = {
     'adminOnly': "BatJong That's an admin-only command.",
-    'joinedList': "BatJong @{name} has joined the waiting list.",
+    'joinedList': "BatJong @{name} has joined the waiting list. There are {total} players awaiting a game.",
     'onList': "BatJong @{name}, you're already on the waiting list.",
-    'leftList': "BatJong @{name} has left the waiting list.",
+    'leftList': "BatJong @{name} has left the waiting list. There are {total} players awaiting a game.",
     'notOnList': "BatJong @{name}, you're not on the waiting list.",
     'waitingTotal': "BatJong There are currently {total} players waiting for a match.",
     'waitingList': "BatJong Players awaiting a match - {list}",
     'reset': "BatJong All active lists have been reset.",
-    'adminAdd': "BatJong @{name} has been added to the waiting list.",
+    'adminAdd': "BatJong @{name} has been added to the waiting list. There are {total} players awaiting a game.",
     'adminAddName': "BatJong You need to provide a player name to add to the list.",
     'adminOnList': "BatJong @{name} is already on the waiting list.",
-    'adminRemove': "Batjong @{name} has been removed from the waiting list.",
+    'adminRemove': "Batjong @{name} has been removed from the waiting list. There are {total} players awaiting a game.",
     'adminRemoveName': "BatJong You need to provide a player name to remove from the list.",
     'adminNotOnList': "BatJong @{name} is not on the waiting list.",
     'commandIncorrect': "BatJong I don't recognise that command...",
@@ -70,27 +74,31 @@ const fn = {
     'join': function(target, data){
         // sign into waiting list to play
         const $player = toBoolean(findInObject($env.waiting, data.$name));
+        let $data = { 'name': data.$name }
         if (!$player) {
             $env.waiting.push(data.$name);
-            $client.say(target, replaceString($messages.joinedList, '{name}', data.$name));
+            $data.total = $env.waiting.length;
+            $client.say(target, replaceString($messages.joinedList, $data));
         } else {
-            $client.say(target, replaceString($messages.onList, '{name}', data.$name));
+            $client.say(target, replaceString($messages.onList, $data));
         }
     },
     'leave': function(target, data){
         // sign out of waiting list
         const $player = toBoolean(findInObject($env.waiting, data.$name));
+        let $data = { 'name': data.$name }
         if ($player) {
             $env.waiting = removeFromArray($env.waiting, data.$name);
-            $client.say(target, replaceString($messages.leftList, '{name}', data.$name));
+            $data.total = $env.waiting.length;
+            $client.say(target, replaceString($messages.leftList, $data));
         } else {
-            $client.say(target, replaceString($messages.notOnList, '{name}', data.$name));
+            $client.say(target, replaceString($messages.notOnList, $data));
         }
     },
     'list': function(target, data){
         // check waiting lists
         if (data.$tgt === '-total') {
-            $client.say(target, replaceString($messages.waitingTotal, '{total}', $env.waiting.length));
+            $client.say(target, replaceString($messages.waitingTotal, {'total': $env.waiting.length}));
         }
         
         if (data.$tgt === '-waiting') {
@@ -100,7 +108,7 @@ const fn = {
                 $list += $env.waiting[i];
             }
             if ($list === '') { $list = '[no players]'; }
-            $client.say(target, replaceString($messages.waitingList, '{list}', $list));
+            $client.say(target, replaceString($messages.waitingList, {'list': $list}));
         }
         
         if (data.$tgt === '-ready') {
@@ -125,11 +133,13 @@ const fn = {
         // ADMIN ONLY - manually add a player to the waiting list
         if (data.$me && data.$tgt !== null) {
             const $player = toBoolean(findInObject($env.waiting, data.$tgt));
+            let $data = { 'name': data.$tgt }
             if (!$player) {
                 $env.waiting.push(data.$tgt);
-                $client.say(target, replaceString($messages.adminAdd, '{name}', data.$tgt));
+                $data.total = $env.waiting.length;
+                $client.say(target, replaceString($messages.adminAdd, $data));
             } else {
-                $client.say(target, replaceString($messages.adminOnList, '{name}', data.$tgt));
+                $client.say(target, replaceString($messages.adminOnList, $data));
             }
         }
 
@@ -145,11 +155,13 @@ const fn = {
         // ADMIN ONLY - manually remove a player (or all) from the waiting list
         if (data.$me && data.$tgt !== null) {
             const $player = toBoolean(findInObject($env.waiting, data.$tgt));
+            let $data = { 'name': data.$tgt }
             if ($player) {
                 $env.waiting = removeFromArray($env.waiting, data.$tgt);
-                $client.say(target, replaceString($messages.adminRemove, '{name}', data.$tgt));
+                $data.total = $env.waiting.length;
+                $client.say(target, replaceString($messages.adminRemove, $data));
             } else {
-                $client.say(target, replaceString($messages.adminNotOnList, '{name}', data.$tgt));
+                $client.say(target, replaceString($messages.adminNotOnList, $data));
             }
         }
 
