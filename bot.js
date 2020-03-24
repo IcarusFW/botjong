@@ -232,6 +232,9 @@ const fn = {
     },
     'generate': (target, data) => {
         // ADMIN ONLY - generate waiting tables using the current active player list
+        if (data.$me) {
+            generateTables();
+        }
 
         if (!data.$me){
             $client.say(target, $messages.adminOnly);
