@@ -30,23 +30,25 @@ const $pervert = [
 ]
 
 const $messages = {
-    'adminOnly': "BatJong That's an admin-only command.",
-    'joinedList': "BatJong @{name} has joined the waiting list. There are {total} players awaiting a game.",
-    'onList': "BatJong @{name}, you're already on the waiting list.",
-    'leftList': "BatJong @{name} has left the waiting list. There are {total} players awaiting a game.",
-    'notOnList': "BatJong @{name}, you're not on the waiting list.",
-    'waitingTotal': "BatJong There are currently {total} players waiting for a match.",
-    'waitingList': "BatJong Players awaiting a match - {list}",
-    'reset': "BatJong All active lists have been reset.",
-    'adminAdd': "BatJong @{name} has been added to the waiting list. There are {total} players awaiting a game.",
-    'adminAddName': "BatJong You need to provide a player name to add to the list.",
-    'adminOnList': "BatJong @{name} is already on the waiting list.",
-    'adminRemove': "Batjong @{name} has been removed from the waiting list. There are {total} players awaiting a game.",
-    'adminRemoveName': "BatJong You need to provide a player name to remove from the list.",
-    'adminNotOnList': "BatJong @{name} is not on the waiting list.",
-    'commandIncorrect': "BatJong I don't recognise that command...",
-    'optionIncorrect': "BatJong I don't know that option...",
-    'targetIncorrect': "BatJong I don't understand that request...",
+    'system': {
+        'adminOnly': "BatJong That's an admin-only command.",
+        'joinedList': "BatJong @{name} has joined the waiting list. There are {total} players awaiting a game.",
+        'onList': "BatJong @{name}, you're already on the waiting list.",
+        'leftList': "BatJong @{name} has left the waiting list. There are {total} players awaiting a game.",
+        'notOnList': "BatJong @{name}, you're not on the waiting list.",
+        'waitingTotal': "BatJong There are currently {total} players waiting for a match.",
+        'waitingList': "BatJong Players awaiting a match - {list}",
+        'reset': "BatJong All active lists have been reset.",
+        'adminAdd': "BatJong @{name} has been added to the waiting list. There are {total} players awaiting a game.",
+        'adminAddName': "BatJong You need to provide a player name to add to the list.",
+        'adminOnList': "BatJong @{name} is already on the waiting list.",
+        'adminRemove': "Batjong @{name} has been removed from the waiting list. There are {total} players awaiting a game.",
+        'adminRemoveName': "BatJong You need to provide a player name to remove from the list.",
+        'adminNotOnList': "BatJong @{name} is not on the waiting list.",
+        'commandIncorrect': "BatJong I don't recognise that command...",
+        'optionIncorrect': "BatJong I don't know that option...",
+        'targetIncorrect': "BatJong I don't understand that request...",
+    }
 }
 
 const utils = {
@@ -99,9 +101,9 @@ const fn = {
         if (!$player) {
             $env.waiting.push(data.$name);
             $data.total = $env.waiting.length;
-            $client.say(target, utils.replaceString($messages.joinedList, $data));
+            $client.say(target, utils.replaceString($messages.system.joinedList, $data));
         } else {
-            $client.say(target, utils.replaceString($messages.onList, $data));
+            $client.say(target, utils.replaceString($messages.system.onList, $data));
         }
     },
     'leave': (target, data) => {
@@ -111,15 +113,15 @@ const fn = {
         if ($player) {
             $env.waiting = utils.removeFromArray($env.waiting, data.$name);
             $data.total = $env.waiting.length;
-            $client.say(target, utils.replaceString($messages.leftList, $data));
+            $client.say(target, utils.replaceString($messages.system.leftList, $data));
         } else {
-            $client.say(target, utils.replaceString($messages.notOnList, $data));
+            $client.say(target, utils.replaceString($messages.system.notOnList, $data));
         }
     },
     'list': (target, data) => {
         // check waiting lists
         if (data.$tgt === '-total') {
-            $client.say(target, utils.replaceString($messages.waitingTotal, {'total': $env.waiting.length}));
+            $client.say(target, utils.replaceString($messages.system.waitingTotal, {'total': $env.waiting.length}));
         }
         
         if (data.$tgt === '-waiting') {
@@ -129,7 +131,7 @@ const fn = {
                 $list += $env.waiting[i];
             }
             if ($list === '') { $list = '[no players]'; }
-            $client.say(target, utils.replaceString($messages.waitingList, {'list': $list}));
+            $client.say(target, utils.replaceString($messages.system.waitingList, {'list': $list}));
         }
         
         if (data.$tgt === '-ready') {
@@ -141,7 +143,7 @@ const fn = {
         } 
         
         if (data.$tgt === null) {
-            $client.say(target, $messages.targetIncorrect);
+            $client.say(target, $messages.system.targetIncorrect);
         }
     },
     'play': (target, data) => {
@@ -158,18 +160,18 @@ const fn = {
             if (!$player) {
                 $env.waiting.push(data.$tgt);
                 $data.total = $env.waiting.length;
-                $client.say(target, utils.replaceString($messages.adminAdd, $data));
+                $client.say(target, utils.replaceString($messages.system.adminAdd, $data));
             } else {
-                $client.say(target, utils.replaceString($messages.adminOnList, $data));
+                $client.say(target, utils.replaceString($messages.system.adminOnList, $data));
             }
         }
 
         if (data.$me && data.$tgt === null) {
-            $client.say(target, $messages.adminAddName);
+            $client.say(target, $messages.system.adminAddName);
         } 
 
         if (!data.$me){
-            $client.say(target, $messages.adminOnly);
+            $client.say(target, $messages.system.adminOnly);
         }
     },
     'remove': (target, data) => {
@@ -180,24 +182,24 @@ const fn = {
             if ($player) {
                 $env.waiting = utils.removeFromArray($env.waiting, data.$tgt);
                 $data.total = $env.waiting.length;
-                $client.say(target, utils.replaceString($messages.adminRemove, $data));
+                $client.say(target, utils.replaceString($messages.system.adminRemove, $data));
             } else {
-                $client.say(target, utils.replaceString($messages.adminNotOnList, $data));
+                $client.say(target, utils.replaceString($messages.system.adminNotOnList, $data));
             }
         }
 
         if (data.$me && data.$tgt === null) {
-            $client.say(target, $messages.adminRemoveName);
+            $client.say(target, $messages.system.adminRemoveName);
         } 
 
         if (!data.$me){
-            $client.say(target, $messages.adminOnly);
+            $client.say(target, $messages.system.adminOnly);
         }
     },
     'close': (target, data) => {
         // ADMIN ONLY - close a waiting table (or all tables)
         if (!data.$me){
-            $client.say(target, $messages.adminOnly);
+            $client.say(target, $messages.system.adminOnly);
         }
     },
     'reset': (target, data) => {
@@ -206,30 +208,30 @@ const fn = {
             $env.waiting = [];
             $env.playing = [];
             $env.tables = {};
-            $client.say(target, $messages.reset);
+            $client.say(target, $messages.system.reset);
         }
 
         if (!data.$me){
-            $client.say(target, $messages.adminOnly);
+            $client.say(target, $messages.system.adminOnly);
         }
     },
     'notify': (target, data) => {
         // ADMIN ONLY - send a notification to a waiting table
         if (!data.$me){
-            $client.say(target, $messages.adminOnly);
+            $client.say(target, $messages.system.adminOnly);
         }
     },
     'start': (target, data) => {
         // ADMIN ONLY - restart command watching
         if (!data.$me){
-            $client.say(target, $messages.adminOnly);
+            $client.say(target, $messages.system.adminOnly);
         }
     },
     'stop': (target, data) => {
         // ADMIN ONLY - stop command watching (excluding !batjong start)
 
         if (!data.$me){
-            $client.say(target, $messages.adminOnly);
+            $client.say(target, $messages.system.adminOnly);
         }
     },
     'generate': (target, data) => {
@@ -239,7 +241,7 @@ const fn = {
         }
 
         if (!data.$me){
-            $client.say(target, $messages.adminOnly);
+            $client.say(target, $messages.system.adminOnly);
         }
     },
     'log': (target, data) => {
@@ -251,7 +253,7 @@ const fn = {
         }
 
         if (!data.$me){
-            $client.say(target, $messages.adminOnly);
+            $client.say(target, $messages.system.adminOnly);
         }
     }
 }
@@ -281,7 +283,7 @@ function onMessageHandler(target, context, msg, self) {
         if (typeof fn[$data.$opt] !== 'undefined') {
             fn[$data.$opt](target, $data);
         } else {
-            $client.say(target, $messages.commandIncorrect);
+            $client.say(target, $messages.system.commandIncorrect);
         }
     } else if ($data.$cmd === process.env.BOT_COMMAND && $data.$opt === null) {
         $client.say(target, `BatJong : I am the night.`);
