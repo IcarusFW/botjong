@@ -31,27 +31,40 @@ const $pervert = [
 
 const $messages = {
     'system': {
-        'adminOnly': "BatJong That's an admin-only command.",
-        'joinedList': "BatJong @{name} has joined the waiting list. There are {total} players awaiting a game.",
-        'onList': "BatJong @{name}, you're already on the waiting list.",
-        'leftList': "BatJong @{name} has left the waiting list. There are {total} players awaiting a game.",
-        'notOnList': "BatJong @{name}, you're not on the waiting list.",
-        'waitingTotal': "BatJong There are currently {total} players waiting for a match.",
-        'waitingList': "BatJong Players awaiting a match - {list}",
-        'reset': "BatJong All active lists have been reset.",
-        'tableCreated': "BatJong A new table is ready - ID: {hash} => players: {players}",
-        'tableStarted': "BatJong The match with table ID {id} has been started.",
-        'tableNotFound': "BatJong I can't find that table...",
-        'adminAdd': "BatJong @{name} has been added to the waiting list. There are {total} players awaiting a game.",
-        'adminAddName': "BatJong You need to provide a player name to add to the list.",
-        'adminOnList': "BatJong @{name} is already on the waiting list.",
-        'adminRemove': "Batjong @{name} has been removed from the waiting list. There are {total} players awaiting a game.",
-        'adminRemoveName': "BatJong You need to provide a player name to remove from the list.",
-        'adminNotOnList': "BatJong @{name} is not on the waiting list.",
-        'commandIncorrect': "BatJong I don't recognise that command...",
-        'optionIncorrect': "BatJong I don't know that option...",
-        'targetIncorrect': "BatJong I don't understand that request...",
-    }
+        'adminOnly': "That's an admin-only command.",
+        'joinedList': "@{name} has joined the waiting list. There are {total} players awaiting a game.",
+        'onList': "@{name}, you're already on the waiting list.",
+        'leftList': "@{name} has left the waiting list. There are {total} players awaiting a game.",
+        'notOnList': "@{name}, you're not on the waiting list.",
+        'waitingTotal': "There are currently {total} players waiting for a match.",
+        'waitingList': "Players awaiting a match - {list}",
+        'reset': "All active lists have been reset.",
+        'tableCreated': "A new table is ready - ID: {hash} --> players: {players}",
+        'tableStarted': "The match with table ID {id} has been started.",
+        'tableNotFound': "I can't find that table...",
+        'adminAdd': "@{name} has been added to the waiting list. There are {total} players awaiting a game.",
+        'adminAddName': "You need to provide a player name to add to the list.",
+        'adminOnList': "@{name} is already on the waiting list.",
+        'adminRemove': "@{name} has been removed from the waiting list. There are {total} players awaiting a game.",
+        'adminRemoveName': "You need to provide a player name to remove from the list.",
+        'adminNotOnList': "@{name} is not on the waiting list.",
+        'commandIncorrect': "I don't recognise that command...",
+        'optionIncorrect': "I don't know that option...",
+        'targetIncorrect': "I don't understand that request...",
+    },
+    'silly': [
+        'BatJong I am the night.',
+        'BatJong I am whatever mahjong needs me to be.',
+        'BatJong Batjong has no limits.',
+        'BatJong It’s not what uradora I am but what I pon that defines me.',
+        'BatJong Sometimes it’s only furiten that makes us what we are.',
+        'BatJong You either deal-in a hero, or you live long enough to see yourself become the drawn game.',
+        'BatJong You’re not the devil. You’re practice.',
+        'BatJong Riichis frighten me. It’s time the world shared my dread.',
+        'PonChamp',
+        'Chiisus',
+        'YesWeKan'
+    ]
 }
 
 const utils = {
@@ -70,6 +83,9 @@ const utils = {
     },
     'removeFromArray': (obj, name) => {
         return obj.filter(val => val !== name);
+    },
+    'removeFromObject': (obj, name) => {
+        return delete obj[name];
     },
     'printArray': (obj) => {
         let $temp = '';
@@ -167,7 +183,7 @@ const fn = {
             const $id = utils.findInObject($env.ready, data.$tgt);
             if ($id) {
                 var $obj = $env.ready[data.$tgt];
-                delete $env.ready[data.$tgt];
+                utils.removeFromObject($env.ready, data.$tgt);
                 $env.playing[data.$tgt] = $obj;
                 return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
             } else {
@@ -316,7 +332,7 @@ function onMessageHandler(target, context, msg, self) {
             $client.say(target, $messages.system.commandIncorrect);
         }
     } else if ($data.$cmd === process.env.BOT_COMMAND && $data.$opt === null) {
-        $client.say(target, `BatJong I am the night.`);
+        $client.say(target, utils.randomSelect($messages.silly));
     }
 
     console.log('msg', $msg);
