@@ -22,6 +22,11 @@ let $env = {
     'playing': {}
 }
 
+let $timers = {
+    'seconds': 1000,
+    'multiplier': 1
+}
+
 const $pervert = [
     'https://www.reddit.com/r/rule34/',
     'https://exhentai.org',
@@ -42,6 +47,8 @@ const $messages = {
         'tableCreated': "A new table is ready - ID: {hash} --> players: {players}",
         'tableStarted': "The match with table ID {id} has been started.",
         'tableNotFound': "I can't find that table...",
+        'generatingTables': "Creating tables from current waiting list...",
+        'notEnoughPlayers': "There are not enough players waiting to create a table.",
         'adminAdd': "@{name} has been added to the waiting list. There are {total} players awaiting a game.",
         'adminAddName': "You need to provide a player name to add to the list.",
         'adminOnList': "@{name} is already on the waiting list.",
@@ -59,7 +66,7 @@ const $messages = {
         'BatJong It’s not what uradora I am but what I pon that defines me.',
         'BatJong Sometimes it’s only furiten that makes us what we are.',
         'BatJong You either deal-in a hero, or you live long enough to see yourself become the drawn game.',
-        'BatJong You’re not the devil. You’re practice.',
+        'BatJong You’re not the yakuman. You’re practice.',
         'BatJong Riichis frighten me. It’s time the world shared my dread.',
         'PonChamp',
         'Chiisus',
@@ -283,7 +290,11 @@ const fn = {
     'generate': (target, data) => {
         // ADMIN ONLY - generate waiting tables using the current active player list
         if (data.$me) {
-            return utils.generateTables(target);
+            if ($env.waiting.length >= 4) {
+                return utils.generateTables(target);
+            } else {
+                return $client.say(target, $messages.system.notEnoughPlayers);
+            }
         }
 
         if (!data.$me) {
