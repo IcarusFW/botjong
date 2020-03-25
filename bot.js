@@ -52,30 +52,33 @@ const $messages = {
 }
 
 const utils = {
-    isMe: (name) => { return (name === process.env.ME) ? true : false; },
-    getHash: () => { Math.random().toString(36).substr(2, 5); },
-    findInObject: (obj, name) => {
-        return obj.find(function(e){
+    'isMe': (name) => { return (name === process.env.ME) ? true : false; },
+    'getHash': () => { return Math.random().toString(36).substr(2, 5); },
+    'findInArray': (obj, name) => {
+        return obj.find(function (e) {
             return (e === name);
         });
     },
-    toBoolean: (itm) => {
+    'findInObject': (obj, name) => {
+        return obj.hasOwnProperty(name);
+    },
+    'toBoolean': (itm) => {
         return Boolean(itm);
     },
-    removeFromArray: (obj, name) => {
+    'removeFromArray': (obj, name) => {
         return obj.filter(val => val !== name);
     },
-    replaceString: (itm, obj) => {
+    'replaceString': (itm, obj) => {
         let $temp = itm;
         for (let key in obj) {
             $temp = $temp.replace(`{${key}}`, obj[key]);
         }
         return $temp;
     },
-    randomSelect: (arr) => {
+    'randomSelect': (arr) => {
         return arr[Math.floor(Math.random() * arr.length)]
     },
-    generateTables: () => {
+    'generateTables': () => {
         if ($env.waiting.length >= 4) {
             let $table = [];
             for (var i = 1; i <= 4; i++) {
@@ -84,7 +87,7 @@ const utils = {
                 $env.waiting = utils.removeFromArray($env.waiting, $name);
 
                 if (i === 4) {
-                    var $hash = utils.getHash();
+                    let $hash = utils.getHash();
                     $env.ready[$hash] = $table;
                     utils.generateTables();
                 }
@@ -96,7 +99,7 @@ const utils = {
 const fn = {
     'join': (target, data) => {
         // sign into waiting list to play
-        const $player = utils.toBoolean(utils.findInObject($env.waiting, data.$name));
+        const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$name));
         let $data = { 'name': data.$name }
         if (!$player) {
             $env.waiting.push(data.$name);
@@ -108,7 +111,7 @@ const fn = {
     },
     'leave': (target, data) => {
         // sign out of waiting list
-        const $player = utils.toBoolean(utils.findInObject($env.waiting, data.$name));
+        const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$name));
         let $data = { 'name': data.$name }
         if ($player) {
             $env.waiting = utils.removeFromArray($env.waiting, data.$name);
@@ -121,9 +124,9 @@ const fn = {
     'list': (target, data) => {
         // check waiting lists
         if (data.$tgt === '-total') {
-            $client.say(target, utils.replaceString($messages.system.waitingTotal, {'total': $env.waiting.length}));
+            $client.say(target, utils.replaceString($messages.system.waitingTotal, { 'total': $env.waiting.length }));
         }
-        
+
         if (data.$tgt === '-waiting') {
             let $list = '';
             for (var i = 0; i < $env.waiting.length; i++) {
@@ -131,23 +134,38 @@ const fn = {
                 $list += $env.waiting[i];
             }
             if ($list === '') { $list = '[no players]'; }
-            $client.say(target, utils.replaceString($messages.system.waitingList, {'list': $list}));
+            $client.say(target, utils.replaceString($messages.system.waitingList, { 'list': $list }));
         }
-        
+
         if (data.$tgt === '-ready') {
             //$client.say(target, `BatJong : Hash generated - ${getHash()}`);
         }
 
         if (data.$tgt === '-playing') {
             //$client.say(target, `BatJong : Hash generated - ${getHash()}`);
-        } 
-        
+        }
+
         if (data.$tgt === null) {
             $client.say(target, $messages.system.targetIncorrect);
         }
     },
     'play': (target, data) => {
         // init game start and move to active tables
+        if (data.$tgt !== null) {
+            const $id = utils.findInObject($env.ready, data.$tgt);
+            if ($id) {
+                var $data = $env.ready[data.$tgt];
+                delete $env.ready[data.$tgt];
+                $env.playing[data.$tgt] = $data;
+                $client.say(target, `BatJong The match with table ID ${data.$tgt} has been started.`);
+            } else {
+                // can't find id
+            }
+        }
+
+        if (data.$tgt === null) {
+            $client.say(target, $messages.system.targetIncorrect);
+        }
     },
     'lewds': (target, data) => {
         // post lewds lmao
@@ -155,7 +173,7 @@ const fn = {
     'add': (target, data) => {
         // ADMIN ONLY - manually add a player to the waiting list
         if (data.$me && data.$tgt !== null) {
-            const $player = utils.toBoolean(utils.findInObject($env.waiting, data.$tgt));
+            const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$tgt));
             let $data = { 'name': data.$tgt }
             if (!$player) {
                 $env.waiting.push(data.$tgt);
@@ -168,16 +186,16 @@ const fn = {
 
         if (data.$me && data.$tgt === null) {
             $client.say(target, $messages.system.adminAddName);
-        } 
+        }
 
-        if (!data.$me){
+        if (!data.$me) {
             $client.say(target, $messages.system.adminOnly);
         }
     },
     'remove': (target, data) => {
         // ADMIN ONLY - manually remove a player (or all) from the waiting list
         if (data.$me && data.$tgt !== null) {
-            const $player = utils.toBoolean(utils.findInObject($env.waiting, data.$tgt));
+            const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$tgt));
             let $data = { 'name': data.$tgt }
             if ($player) {
                 $env.waiting = utils.removeFromArray($env.waiting, data.$tgt);
@@ -190,47 +208,47 @@ const fn = {
 
         if (data.$me && data.$tgt === null) {
             $client.say(target, $messages.system.adminRemoveName);
-        } 
+        }
 
-        if (!data.$me){
+        if (!data.$me) {
             $client.say(target, $messages.system.adminOnly);
         }
     },
     'close': (target, data) => {
         // ADMIN ONLY - close a waiting table (or all tables)
-        if (!data.$me){
+        if (!data.$me) {
             $client.say(target, $messages.system.adminOnly);
         }
     },
     'reset': (target, data) => {
         // ADMIN ONLY - reset both wait list and wait tables to init state
-        if (data.$me){
+        if (data.$me) {
             $env.waiting = [];
             $env.playing = [];
             $env.tables = {};
             $client.say(target, $messages.system.reset);
         }
 
-        if (!data.$me){
+        if (!data.$me) {
             $client.say(target, $messages.system.adminOnly);
         }
     },
     'notify': (target, data) => {
         // ADMIN ONLY - send a notification to a waiting table
-        if (!data.$me){
+        if (!data.$me) {
             $client.say(target, $messages.system.adminOnly);
         }
     },
     'start': (target, data) => {
         // ADMIN ONLY - restart command watching
-        if (!data.$me){
+        if (!data.$me) {
             $client.say(target, $messages.system.adminOnly);
         }
     },
     'stop': (target, data) => {
         // ADMIN ONLY - stop command watching (excluding !batjong start)
 
-        if (!data.$me){
+        if (!data.$me) {
             $client.say(target, $messages.system.adminOnly);
         }
     },
@@ -240,19 +258,19 @@ const fn = {
             utils.generateTables();
         }
 
-        if (!data.$me){
+        if (!data.$me) {
             $client.say(target, $messages.system.adminOnly);
         }
     },
     'log': (target, data) => {
         // ADMIN ONLY - output all tracking lists to console
-        if (data.$me){
+        if (data.$me) {
             console.log('msg', [data.$cmd, data.$opt, data.$tgt]);
             console.log('env', $env);
             console.log('data', data);
         }
 
-        if (!data.$me){
+        if (!data.$me) {
             $client.say(target, $messages.system.adminOnly);
         }
     }
@@ -260,7 +278,7 @@ const fn = {
 
 // Called every time a message comes in
 function onMessageHandler(target, context, msg, self) {
-    
+
     // remove whitespace from chat message and split
     const $msg = msg.trim().split(" ");
 
