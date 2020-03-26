@@ -23,7 +23,7 @@ let $env = {
 }
 
 let $timers = {
-    'seconds': 1000,
+    'seconds': 1500, // must be a second or greater to bypass twitch chat simultaneous post limitation
     'multiplier': 1
 }
 
@@ -113,6 +113,12 @@ const utils = {
         return arr[Math.floor(Math.random() * arr.length)]
     },
     'generateTables': (target) => {
+        let $data = {};
+        let $target = target;
+        let $message = () => {
+            $client.say($target, utils.replaceString($messages.system.tableCreated, $data))
+        }
+
         if ($env.waiting.length >= 4) {
             let $table = [];
             for (var i = 1; i <= 4; i++) {
@@ -123,14 +129,15 @@ const utils = {
                 if (i === 4) {
                     let $hash = utils.getHash();
                     $env.ready[$hash] = $table;
-                    let $data = {
-                        'hash': $hash,
-                        'players': utils.printArray($env.ready[$hash])
-                    }
-                    $client.say(target, utils.replaceString($messages.system.tableCreated, $data));
-                    utils.generateTables();
+                    $data.hash = $hash;
+                    $data.players = utils.printArray($env.ready[$hash]);
+                    setTimeout($message, ($timers.seconds * $timers.multiplier));
+                    $timers.multiplier = $timers.multiplier + 1;
+                    utils.generateTables(target);
                 }
             }
+        } else {
+            $timers.multiplier = 1;
         }
     }
 }
@@ -291,6 +298,7 @@ const fn = {
         // ADMIN ONLY - generate waiting tables using the current active player list
         if (data.$me) {
             if ($env.waiting.length >= 4) {
+                $client.say(target, $messages.system.generatingTables);
                 return utils.generateTables(target);
             } else {
                 return $client.say(target, $messages.system.notEnoughPlayers);
