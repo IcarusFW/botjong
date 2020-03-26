@@ -23,15 +23,22 @@ let $env = {
 }
 
 let $timers = {
-    'seconds': 1500, // must be a second or greater to bypass twitch chat simultaneous post limitation
-    'multiplier': 1
+    'generate': {
+        'seconds': 1500,
+        'multiplier': 1
+    },
+    'list': {
+        'seconds': 1500,
+        'multiplier': 1
+    }
 }
 
 const $pervert = [
     'https://www.reddit.com/r/rule34/',
     'https://exhentai.org',
     'https://e-hentai.org',
-    'https://www.pixiv.net/tags/R-18'
+    'https://www.pixiv.net/tags/R-18',
+    'https://nhentai.net'
 ]
 
 const $messages = {
@@ -131,16 +138,33 @@ const utils = {
                     $env.ready[$hash] = $table;
                     $data.hash = $hash;
                     $data.players = utils.printArray($env.ready[$hash]);
-                    setTimeout($message, ($timers.seconds * $timers.multiplier));
-                    $timers.multiplier = $timers.multiplier + 1;
+                    setTimeout($message, ($timers.generate.seconds * $timers.generate.multiplier));
+                    $timers.generate.multiplier = $timers.generate.multiplier + 1;
                     utils.generateTables(target);
                 }
             }
         } else {
-            $timers.multiplier = 1;
+            return ($timers.generate.multiplier = 1);
         }
     }
 }
+
+/*
+TO DO:
+'join' -> add deep search into ready and playing lists
+'list -ready' -> function body
+'list -playing' -> function body
+'play [id]' - -> function body to set playing start, and timeout after 5min to autoremove from list
+'lewds' -> update link and message object, hook into stringReplace
+'add [name]' -> add deep search into ready and playing lists
+'remove -all' -> function body, update function to accommodate
+'close' -> function bodies for [id] and '-all'
+'reset' -> add timer resets
+'notify' -> function body(?)
+'stop' -> function body(?)
+'start' -> function body(?)
+'generate' -> add notify setInterval? will need clearInterval tied to table ID on 'play [id]' command
+*/
 
 const fn = {
     'join': (target, data) => {
@@ -156,7 +180,7 @@ const fn = {
         }
     },
     'leave': (target, data) => {
-        // sign out of waiting list
+        // sign out of waiting list - DONE
         const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$name));
         let $data = { 'name': data.$name }
         if ($player) {
@@ -310,7 +334,7 @@ const fn = {
         }
     },
     'log': (target, data) => {
-        // ADMIN ONLY - output all tracking lists to console
+        // ADMIN ONLY - output all tracking lists to console - DONE
         if (data.$me) {
             console.log('msg', [data.$cmd, data.$opt, data.$tgt]);
             console.log('env', $env);
