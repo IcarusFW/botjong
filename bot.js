@@ -173,7 +173,6 @@ TO DO:
 'lewds' -> update link and message object, hook into stringReplace
 'remove -all' -> function body, update function to accommodate
 'close' -> function bodies for [id] and '-all'
-'reset' -> add timer resets
 'notify' -> function body(?)
 'stop' -> function body(?)
 'start' -> function body(?)
@@ -332,6 +331,17 @@ const fn = {
             $env.waiting = [];
             $env.ready = {};
             $env.playing = {};
+
+            $timers = {
+                'generate': {
+                    'seconds': 1500,
+                    'multiplier': 1
+                },
+                'list': {
+                    'seconds': 1500,
+                    'multiplier': 1
+                }
+            }
 
             return $client.say(target, $messages.system.reset);
         }
