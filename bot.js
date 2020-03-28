@@ -66,6 +66,11 @@ const $messages = {
         'adminRemove': "@{name} has been removed from the waiting list. There are {total} players awaiting a game.",
         'adminRemoveName': "You need to provide a player name to remove from the list.",
         'adminNotOnList': "@{name} is not on the waiting list.",
+        'adminAllReadyClosed': "All waiting tables have been closed.",
+        'adminAllPlayingClosed': "All playing tables have been closed.",
+        'adminTableClosed': "The table with id: {id} has been closed.",
+        'adminTableNotFound': "I could not find a table with that id...",
+        'adminTableIDNeeded': "You need to provide a table id.",
         'commandIncorrect': "I don't recognise that command...",
         'optionIncorrect': "I don't know that option...",
         'targetIncorrect': "I don't understand that request...",
@@ -172,10 +177,9 @@ TO DO:
 'play [id]' - -> function body to set playing start, and timeout after 5min to autoremove from list
 'lewds' -> update link and message object, hook into stringReplace
 'remove -all' -> function body, update function to accommodate
-'close' -> function bodies for [id] and '-all'
 'notify' -> function body(?)
-'stop' -> function body(?)
-'start' -> function body(?)
+'restart' -> function body(?)
+'pause' -> function body(?)
 'generate' -> add notify setInterval? will need clearInterval tied to table ID on 'play [id]' command
 */
 
@@ -319,8 +323,54 @@ const fn = {
             return $client.say(target, $messages.system.adminOnly);
         }
     },
-    'close': (target, data) => {
+    'closeready': (target, data) => {
         // ADMIN ONLY - close a waiting table (or all tables)
+        if (data.$me && data.$tgt !== null) {
+            if (data.$tgt === '-all') {
+                $env.ready = {};
+                return $client.say(target, $messages.system.adminAllReadyClosed);
+            } else {
+                const $inReady = utils.findInObject($env.ready, data.$tgt);
+                if ($inReady) {
+                    let $data = { 'id': data.$tgt };
+                    utils.removeFromObject($env.ready, data.$tgt);
+                    return $client.say(target, utils.replaceString($messages.system.adminTableClosed, $data));
+                } else {
+                    return $client.say(target, $messages.system.adminTableNotFound);
+                }
+            }
+        }
+
+        if (data.$me && data.$tgt !== null) {
+            return $client.say(target, $messages.system.adminTableIDNeeded);
+        }
+
+        if (!data.$me) {
+            return $client.say(target, $messages.system.adminOnly);
+        }
+    },
+    'closeplaying': (target, data) => {
+        // ADMIN ONLY - close a playing table (or all tables)
+        if (data.$me && data.$tgt !== null) {
+            if (data.$tgt === '-all') {
+                $env.playing = {};
+                return $client.say(target, $messages.system.adminAllPlayingClosed);
+            } else {
+                const $inPlaying = utils.findInObject($env.playing, data.$tgt);
+                if ($inPlaying) {
+                    let $data = { 'id': data.$tgt };
+                    utils.removeFromObject($env.playing, data.$tgt);
+                    return $client.say(target, utils.replaceString($messages.system.adminTableClosed, $data));
+                } else {
+                    return $client.say(target, $messages.system.adminTableNotFound);
+                }
+            }
+        }
+
+        if (data.$me && data.$tgt !== null) {
+            return $client.say(target, $messages.system.adminTableIDNeeded);
+        }
+
         if (!data.$me) {
             return $client.say(target, $messages.system.adminOnly);
         }
@@ -356,14 +406,14 @@ const fn = {
             return $client.say(target, $messages.system.adminOnly);
         }
     },
-    'start': (target, data) => {
+    'restart': (target, data) => {
         // ADMIN ONLY - restart command watching
         if (!data.$me) {
             return $client.say(target, $messages.system.adminOnly);
         }
     },
-    'stop': (target, data) => {
-        // ADMIN ONLY - stop command watching (excluding !batjong start)
+    'pause': (target, data) => {
+        // ADMIN ONLY - stop command watching (excluding !batjong restart)
 
         if (!data.$me) {
             return $client.say(target, $messages.system.adminOnly);
