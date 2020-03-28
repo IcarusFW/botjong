@@ -45,7 +45,9 @@ const $messages = {
     'system': {
         'adminOnly': "That's an admin-only command.",
         'joinedList': "@{name} has joined the waiting list. There are {total} players awaiting a game.",
-        'onList': "@{name}, you're already on the waiting list.",
+        'onWaitingList': "@{name}, you're already on the waiting list.",
+        'onReadyList': "@{name}, you're already on a waiting table.",
+        'onPlayingList': "@{name}, you're already in a game.",
         'leftList': "@{name} has left the waiting list. There are {total} players awaiting a game.",
         'notOnList': "@{name}, you're not on the waiting list.",
         'waitingTotal': "There are currently {total} players waiting for a match.",
@@ -58,7 +60,9 @@ const $messages = {
         'notEnoughPlayers': "There are not enough players waiting to create a table.",
         'adminAdd': "@{name} has been added to the waiting list. There are {total} players awaiting a game.",
         'adminAddName': "You need to provide a player name to add to the list.",
-        'adminOnList': "@{name} is already on the waiting list.",
+        'adminOnWaitingList': "@{name} is already on the waiting list.",
+        'adminOnReadyList': "@{name} is already on a waiting table.",
+        'adminOnPlayingList': "@{name} is already in a game.",
         'adminRemove': "@{name} has been removed from the waiting list. There are {total} players awaiting a game.",
         'adminRemoveName': "You need to provide a player name to remove from the list.",
         'adminNotOnList': "@{name} is not on the waiting list.",
@@ -91,6 +95,18 @@ const utils = {
     },
     'findInObject': (obj, name) => {
         return obj.hasOwnProperty(name);
+    },
+    'findInMatches': (obj, name) => {
+        if (obj.length !== 0) {
+            for (let key in obj) {
+                if (utils.toBoolean(utils.findInArray(obj[key], name))) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return false;
+        }
     },
     'toBoolean': (itm) => {
         return Boolean(itm);
@@ -151,12 +167,10 @@ const utils = {
 
 /*
 TO DO:
-'join' -> add deep search into ready and playing lists
 'list -ready' -> function body
 'list -playing' -> function body
 'play [id]' - -> function body to set playing start, and timeout after 5min to autoremove from list
 'lewds' -> update link and message object, hook into stringReplace
-'add [name]' -> add deep search into ready and playing lists
 'remove -all' -> function body, update function to accommodate
 'close' -> function bodies for [id] and '-all'
 'reset' -> add timer resets
@@ -169,14 +183,27 @@ TO DO:
 const fn = {
     'join': (target, data) => {
         // sign into waiting list to play
-        const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$name));
+        const $inWaiting = utils.toBoolean(utils.findInArray($env.waiting, data.$name));
+        const $inReady = utils.findInMatches($env.ready, data.$name);
+        const $inPlaying = utils.findInMatches($env.playing, data.$name);
         let $data = { 'name': data.$name }
-        if (!$player) {
+
+        if ($inWaiting) {
+            return $client.say(target, utils.replaceString($messages.system.onWaitingList, $data));
+        }
+
+        if ($inReady) {
+            return $client.say(target, utils.replaceString($messages.system.onReadyList, $data));
+        }
+
+        if ($inPlaying) {
+            return $client.say(target, utils.replaceString($messages.system.onPlayingList, $data));
+        }
+
+        if (!$inWaiting && !$inReady && !$inPlaying) {
             $env.waiting.push(data.$name);
             $data.total = $env.waiting.length;
             return $client.say(target, utils.replaceString($messages.system.joinedList, $data));
-        } else {
-            return $client.say(target, utils.replaceString($messages.system.onList, $data));
         }
     },
     'leave': (target, data) => {
@@ -239,14 +266,27 @@ const fn = {
     'add': (target, data) => {
         // ADMIN ONLY - manually add a player to the waiting list
         if (data.$me && data.$tgt !== null) {
-            const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$tgt));
+            const $inWaiting = utils.toBoolean(utils.findInArray($env.waiting, data.$tgt));
+            const $inReady = utils.findInMatches($env.ready, data.$tgt);
+            const $inPlaying = utils.findInMatches($env.playing, data.$tgt);
             let $data = { 'name': data.$tgt }
-            if (!$player) {
+
+            if ($inWaiting) {
+                return $client.say(target, utils.replaceString($messages.system.adminOnWaitingList, $data));
+            }
+
+            if ($inReady) {
+                return $client.say(target, utils.replaceString($messages.system.adminOnReadyList, $data));
+            }
+
+            if ($inPlaying) {
+                return $client.say(target, utils.replaceString($messages.system.adminOnPlayingList, $data));
+            }
+
+            if (!$inWaiting && !$inReady && !$inPlaying) {
                 $env.waiting.push(data.$tgt);
                 $data.total = $env.waiting.length;
                 return $client.say(target, utils.replaceString($messages.system.adminAdd, $data));
-            } else {
-                return $client.say(target, utils.replaceString($messages.system.adminOnList, $data));
             }
         }
 
@@ -290,8 +330,9 @@ const fn = {
         // ADMIN ONLY - reset both wait list and wait tables to init state
         if (data.$me) {
             $env.waiting = [];
-            $env.playing = [];
-            $env.tables = {};
+            $env.ready = {};
+            $env.playing = {};
+
             return $client.say(target, $messages.system.reset);
         }
 
