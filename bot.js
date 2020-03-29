@@ -58,6 +58,7 @@ const $messages = {
         'tableReady': "Ready table - ID: {hash} --> players: {players}",
         'tablePlaying': "Active table - ID: {hash} --> players: {players}",
         'tableNotFound': "I can't find that table...",
+        'tableNotStarted': "You need to be on that table to start it.",
         'generatingTables': "Creating tables from current waiting list...",
         'generatingReady': "Listing tables from ready list...",
         'generatingPlaying': "Listing tables from playing list...",
@@ -198,10 +199,9 @@ const utils = {
 
 /*
 TO DO:
-'play [id]' - -> function body to set playing start, and timeout after 5min to autoremove from list
 'lewds' -> update link and message object, hook into stringReplace
 'notify' -> function body(?)
-'restart' -> function body(?)
+'init' -> function body(?)
 'pause' -> function body(?)
 'generate' -> add notify setInterval? will need clearInterval tied to table ID on 'play [id]' command
 */
@@ -285,10 +285,18 @@ const fn = {
         if (data.$tgt !== null) {
             const $id = utils.findInObject($env.ready, data.$tgt);
             if ($id) {
-                let $obj = $env.ready[data.$tgt];
-                utils.removeFromObject($env.ready, data.$tgt);
-                $env.playing[data.$tgt] = $obj;
-                return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
+                let $player = utils.toBoolean(utils.findInArray($env.ready[data.$tgt], data.$name));
+                if ($player) {
+                    let $obj = $env.ready[data.$tgt];
+                    utils.removeFromObject($env.ready, data.$tgt);
+                    $env.playing[data.$tgt] = $obj;
+                    setTimeout(function(){
+                        utils.removeFromObject($env.playing, data.$tgt);
+                    }, 5000);
+                    return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
+                } else {
+                    return $client.say(target, $messages.system.tableNotStarted);
+                }
             } else {
                 return $client.say(target, $messages.system.tableNotFound);
             }
@@ -415,6 +423,33 @@ const fn = {
             return $client.say(target, $messages.system.adminOnly);
         }
     },
+    'start': (target, data) => {
+        // ADMIN ONLY - init game start and move to active tables, bypassing name check
+        if (data.$me) {
+            if (data.$tgt !== null) {
+                const $id = utils.findInObject($env.ready, data.$tgt);
+                if ($id) {
+                    let $obj = $env.ready[data.$tgt];
+                    utils.removeFromObject($env.ready, data.$tgt);
+                    $env.playing[data.$tgt] = $obj;
+                    setTimeout(function () {
+                        utils.removeFromObject($env.playing, data.$tgt);
+                    }, 5000);
+                    return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
+                } else {
+                    return $client.say(target, $messages.system.tableNotFound);
+                }
+            }
+    
+            if (data.$tgt === null) {
+                return $client.say(target, $messages.system.targetIncorrect);
+            }
+        }
+
+        if (!data.$me) {
+            return $client.say(target, $messages.system.adminOnly);
+        }
+    },
     'reset': (target, data) => {
         // ADMIN ONLY - reset both wait list and wait tables to init state
         if (data.$me) {
@@ -446,15 +481,14 @@ const fn = {
             return $client.say(target, $messages.system.adminOnly);
         }
     },
-    'restart': (target, data) => {
-        // ADMIN ONLY - restart command watching
+    'init': (target, data) => {
+        // ADMIN ONLY - init command watching
         if (!data.$me) {
             return $client.say(target, $messages.system.adminOnly);
         }
     },
     'pause': (target, data) => {
-        // ADMIN ONLY - stop command watching (excluding !batjong restart)
-
+        // ADMIN ONLY - stop command watching (excluding !batjong init)
         if (!data.$me) {
             return $client.say(target, $messages.system.adminOnly);
         }

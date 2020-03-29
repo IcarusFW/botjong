@@ -26,10 +26,11 @@ All Botjong commands start with the command listed in `.env.BOT_COMMAND` followe
 - `closeready -all` : remove all tables from the waiting list
 - `closeplaying [id]` : remove a table from the playing list
 - `closeplaying -all` : remove all tables from the playing list
+- `start` : start a table
 - `reset` : empty all tracking lists
 - `notify [id]` : notify a waiting table to start their game
-- `pause` : tell bot to stop watching for all commands except `restart`
-- `restart` : tell bot to start tracking all commands
+- `init` : tell bot to start tracking all commands
+- `pause` : tell bot to stop watching for all commands except `init`
 - `generate` : automatically try to create tables with the current waiting list
 - `log` : output all tracking lists to `console.log()`
 
