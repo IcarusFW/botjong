@@ -61,6 +61,7 @@ const $messages = {
         'generatingTables': "Creating tables from current waiting list...",
         'generatingReady': "Listing tables from ready list...",
         'generatingPlaying': "Listing tables from playing list...",
+        'noTables': "There are no tables in that list.",
         'notEnoughPlayers': "There are not enough players waiting to create a table.",
         'adminAdd': "@{name} has been added to the waiting list. There are {total} players awaiting a game.",
         'adminAddName': "You need to provide a player name to add to the list.",
@@ -256,13 +257,23 @@ const fn = {
         }
 
         if (data.$tgt === '-ready') {
-            $client.say(target, $messages.system.generatingReady);
-            return utils.printMatches(target, $env.ready, $messages.system.tableReady);
+            let $size = Object.keys($env.ready).length;
+            if ($size !== 0) {
+                $client.say(target, $messages.system.generatingReady);
+                return utils.printMatches(target, $env.ready, $messages.system.tableReady);
+            } else {
+                $client.say(target, $messages.system.noTables);
+            } 
         }
 
         if (data.$tgt === '-playing') {
-            $client.say(target, $messages.system.generatingPlaying);
-            return utils.printMatches(target, $env.playing, $messages.system.tablePlaying);
+            let $size = Object.keys($env.playing).length;
+            if ($size !== 0) {
+                $client.say(target, $messages.system.generatingPlaying);
+                return utils.printMatches(target, $env.playing, $messages.system.tablePlaying);
+            } else {
+                $client.say(target, $messages.system.noTables);
+            }
         }
 
         if (data.$tgt === null) {
