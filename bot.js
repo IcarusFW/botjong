@@ -130,7 +130,7 @@ const utils = {
     },
     'printArray': (obj) => {
         let $temp = '';
-        for (var i = 0; i < obj.length; i++) {
+        for (let i = 0; i < obj.length; i++) {
             $temp += (i !== 0) ? ', ' : '';
             $temp += obj[i];
         }
@@ -175,8 +175,8 @@ const utils = {
 
         if ($env.waiting.length >= 4) {
             let $table = [];
-            for (var i = 1; i <= 4; i++) {
-                var $name = utils.randomSelect($env.waiting);
+            for (let i = 1; i <= 4; i++) {
+                let $name = utils.randomSelect($env.waiting);
                 $table.push($name);
                 $env.waiting = utils.removeFromArray($env.waiting, $name);
 
@@ -285,7 +285,7 @@ const fn = {
         if (data.$tgt !== null) {
             const $id = utils.findInObject($env.ready, data.$tgt);
             if ($id) {
-                var $obj = $env.ready[data.$tgt];
+                let $obj = $env.ready[data.$tgt];
                 utils.removeFromObject($env.ready, data.$tgt);
                 $env.playing[data.$tgt] = $obj;
                 return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
