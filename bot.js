@@ -66,6 +66,7 @@ const $messages = {
         'adminRemove': "@{name} has been removed from the waiting list. There are {total} players awaiting a game.",
         'adminRemoveName': "You need to provide a player name to remove from the list.",
         'adminNotOnList': "@{name} is not on the waiting list.",
+        'adminAllWaitingClosed': "All players removed from the waiting list.",
         'adminAllReadyClosed': "All waiting tables have been closed.",
         'adminAllPlayingClosed': "All playing tables have been closed.",
         'adminTableClosed': "The table with id: {id} has been closed.",
@@ -176,7 +177,6 @@ TO DO:
 'list -playing' -> function body
 'play [id]' - -> function body to set playing start, and timeout after 5min to autoremove from list
 'lewds' -> update link and message object, hook into stringReplace
-'remove -all' -> function body, update function to accommodate
 'notify' -> function body(?)
 'restart' -> function body(?)
 'pause' -> function body(?)
@@ -304,14 +304,19 @@ const fn = {
     'remove': (target, data) => {
         // ADMIN ONLY - manually remove a player (or all) from the waiting list
         if (data.$me && data.$tgt !== null) {
-            const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$tgt));
-            let $data = { 'name': data.$tgt }
-            if ($player) {
-                $env.waiting = utils.removeFromArray($env.waiting, data.$tgt);
-                $data.total = $env.waiting.length;
-                return $client.say(target, utils.replaceString($messages.system.adminRemove, $data));
+            if (data.$tgt === '-all') {
+                $env.waiting = [];
+                return $client.say(target, $messages.system.adminAllWaitingClosed);
             } else {
-                return $client.say(target, utils.replaceString($messages.system.adminNotOnList, $data));
+                const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$tgt));
+                let $data = { 'name': data.$tgt }
+                if ($player) {
+                    $env.waiting = utils.removeFromArray($env.waiting, data.$tgt);
+                    $data.total = $env.waiting.length;
+                    return $client.say(target, utils.replaceString($messages.system.adminRemove, $data));
+                } else {
+                    return $client.say(target, utils.replaceString($messages.system.adminNotOnList, $data));
+                }
             }
         }
 
