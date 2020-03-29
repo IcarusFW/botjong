@@ -29,7 +29,7 @@ let $timers = {
     },
     'list': {
         'seconds': 1500,
-        'multiplier': 1
+        'multiplier': 0
     }
 }
 
@@ -55,8 +55,12 @@ const $messages = {
         'reset': "All active lists have been reset.",
         'tableCreated': "A new table is ready - ID: {hash} --> players: {players}",
         'tableStarted': "The match with table ID {id} has been started.",
+        'tableReady': "Ready table - ID: {hash} --> players: {players}",
+        'tablePlaying': "Active table - ID: {hash} --> players: {players}",
         'tableNotFound': "I can't find that table...",
         'generatingTables': "Creating tables from current waiting list...",
+        'generatingReady': "Listing tables from ready list...",
+        'generatingPlaying': "Listing tables from playing list...",
         'notEnoughPlayers': "There are not enough players waiting to create a table.",
         'adminAdd': "@{name} has been added to the waiting list. There are {total} players awaiting a game.",
         'adminAddName': "You need to provide a player name to add to the list.",
@@ -131,6 +135,26 @@ const utils = {
         }
         return $temp;
     },
+    'printMatches': (target, obj, message) => {
+        let $data = {};
+        let $index = 0;
+        let $size = Object.keys(obj).length;
+        let $message = () => {
+            $client.say(target, utils.replaceString(message, $data))
+        }
+        for (let key in obj) {
+            $index = $index + 1;
+            $timers.list.multiplier = $timers.list.multiplier + 1;
+            $data = {
+                'hash': key,
+                'players': utils.printArray(obj[key])
+            };
+            setTimeout($message, ($timers.list.seconds * $timers.list.multiplier));
+            if ($index === $size) {
+                $timers.list.multiplier = 0;
+            }
+        }
+    },
     'replaceString': (itm, obj) => {
         let $temp = itm;
         for (let key in obj) {
@@ -173,8 +197,6 @@ const utils = {
 
 /*
 TO DO:
-'list -ready' -> function body
-'list -playing' -> function body
 'play [id]' - -> function body to set playing start, and timeout after 5min to autoremove from list
 'lewds' -> update link and message object, hook into stringReplace
 'notify' -> function body(?)
@@ -234,11 +256,13 @@ const fn = {
         }
 
         if (data.$tgt === '-ready') {
-            //$client.say(target, `BatJong : Hash generated - ${getHash()}`);
+            $client.say(target, $messages.system.generatingReady);
+            return utils.printMatches(target, $env.ready, $messages.system.tableReady);
         }
 
         if (data.$tgt === '-playing') {
-            //$client.say(target, `BatJong : Hash generated - ${getHash()}`);
+            $client.say(target, $messages.system.generatingPlaying);
+            return utils.printMatches(target, $env.playing, $messages.system.tablePlaying);
         }
 
         if (data.$tgt === null) {
@@ -445,6 +469,7 @@ const fn = {
             console.log('msg', [data.$cmd, data.$opt, data.$tgt]);
             console.log('env', $env);
             console.log('data', data);
+            console.log('timers', $timers);
         }
 
         if (!data.$me) {
