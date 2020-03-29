@@ -292,7 +292,7 @@ const fn = {
                     $env.playing[data.$tgt] = $obj;
                     setTimeout(function(){
                         utils.removeFromObject($env.playing, data.$tgt);
-                    }, 5000);
+                    }, 300000);
                     return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
                 } else {
                     return $client.say(target, $messages.system.tableNotStarted);
@@ -434,7 +434,7 @@ const fn = {
                     $env.playing[data.$tgt] = $obj;
                     setTimeout(function () {
                         utils.removeFromObject($env.playing, data.$tgt);
-                    }, 5000);
+                    }, 300000);
                     return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
                 } else {
                     return $client.say(target, $messages.system.tableNotFound);
