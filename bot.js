@@ -93,7 +93,8 @@ const $messages = {
         'BatJong Riichis frighten me. It’s time the world shared my dread.',
         'PonChamp',
         'Chiisus',
-        'YesWeKan'
+        'YesWeKan',
+        'AngryMiku'
     ]
 }
 
@@ -167,7 +168,7 @@ const utils = {
     'randomSelect': (arr) => {
         return arr[Math.floor(Math.random() * arr.length)]
     },
-    'generateTables': (target) => {
+    'generateRandom': (target) => {
         let $data = {};
         let $target = target;
         let $message = () => {
@@ -188,7 +189,7 @@ const utils = {
                     $data.players = utils.printArray($env.ready[$hash]);
                     setTimeout($message, ($timers.generate.seconds * $timers.generate.multiplier));
                     $timers.generate.multiplier = $timers.generate.multiplier + 1;
-                    utils.generateTables(target);
+                    utils.generateRandom(target);
                 }
             }
         } else {
@@ -201,9 +202,10 @@ const utils = {
 TO DO:
 'lewds' -> update link and message object, hook into stringReplace
 'notify' -> function body(?)
-'init' -> function body(?)
-'pause' -> function body(?)
-'generate' -> add notify setInterval? will need clearInterval tied to table ID on 'play [id]' command
+'join' -> if auto=true, check waiting=4 and create table
+'init' -> function body, setInterval, generate whenever waiting=4, set auto=true
+'pause' -> function body, clearInterval
+'create [type]' -> generate either [random] or [order] manually
 */
 
 const fn = {
@@ -434,7 +436,7 @@ const fn = {
                     $env.playing[data.$tgt] = $obj;
                     setTimeout(function () {
                         utils.removeFromObject($env.playing, data.$tgt);
-                    }, 300000);
+                    }, 300000); // 5mins
                     return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
                 } else {
                     return $client.say(target, $messages.system.tableNotFound);
@@ -464,7 +466,7 @@ const fn = {
                 },
                 'list': {
                     'seconds': 1500,
-                    'multiplier': 1
+                    'multiplier': 0
                 }
             }
 
@@ -493,12 +495,12 @@ const fn = {
             return $client.say(target, $messages.system.adminOnly);
         }
     },
-    'generate': (target, data) => {
+    'create': (target, data) => {
         // ADMIN ONLY - generate waiting tables using the current active player list
         if (data.$me) {
             if ($env.waiting.length >= 4) {
                 $client.say(target, $messages.system.generatingTables);
-                return utils.generateTables(target);
+                return utils.generateRandom(target);
             } else {
                 return $client.say(target, $messages.system.notEnoughPlayers);
             }
