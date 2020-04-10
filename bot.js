@@ -62,6 +62,7 @@ const $messages = {
         'generatingTables': "Creating tables from current waiting list...",
         'generatingReady': "Listing tables from ready list...",
         'generatingPlaying': "Listing tables from playing list...",
+        'generatingComplete': "Table generation completed. There are {total} unsorted players still waiting.",
         'noTables': "There are no tables in that list.",
         'notEnoughPlayers': "There are not enough players waiting to create a table.",
         'adminAdd': "@{name} has been added to the waiting list. There are {total} players awaiting a game.",
@@ -175,6 +176,9 @@ const utils = {
         let $message = () => {
             $client.say($target, utils.replaceString($messages.system.tableCreated, $data))
         }
+        let $complete = () => {
+            $client.say(target, utils.replaceString($messages.system.generatingComplete, { 'total': $env.waiting.length }));
+        }
 
         if ($env.waiting.length >= 4) {
             let $table = [];
@@ -194,6 +198,7 @@ const utils = {
                 }
             }
         } else {
+            setTimeout($complete, ($timers.generate.seconds * $timers.generate.multiplier));
             return ($timers.generate.multiplier = 1);
         }
     }
