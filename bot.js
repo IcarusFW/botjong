@@ -78,6 +78,7 @@ const $messages = {
         'adminTableClosed': "The table with id: {id} has been closed.",
         'adminTableNotFound': "I could not find a table with that id...",
         'adminTableIDNeeded': "You need to provide a table id.",
+        'adminTableSortNeeded': "You need to provide a table sorting type.",
         'commandIncorrect': "I don't recognise that command...",
         'optionIncorrect': "I don't know that option...",
         'targetIncorrect': "I don't understand that request...",
@@ -168,7 +169,7 @@ const utils = {
     'randomSelect': (arr) => {
         return arr[Math.floor(Math.random() * arr.length)]
     },
-    'generateRandom': (target) => {
+    'generateTables': (type, target) => {
         let $data = {};
         let $target = target;
         let $message = () => {
@@ -178,7 +179,7 @@ const utils = {
         if ($env.waiting.length >= 4) {
             let $table = [];
             for (let i = 1; i <= 4; i++) {
-                let $name = utils.randomSelect($env.waiting);
+                let $name = (type === '-order') ? $env.waiting[0] : utils.randomSelect($env.waiting);
                 $table.push($name);
                 $env.waiting = utils.removeFromArray($env.waiting, $name);
 
@@ -189,7 +190,7 @@ const utils = {
                     $data.players = utils.printArray($env.ready[$hash]);
                     setTimeout($message, ($timers.generate.seconds * $timers.generate.multiplier));
                     $timers.generate.multiplier = $timers.generate.multiplier + 1;
-                    utils.generateRandom(target);
+                    utils.generateTables(type, target);
                 }
             }
         } else {
@@ -202,10 +203,10 @@ const utils = {
 TO DO:
 'lewds' -> update link and message object, hook into stringReplace
 'notify' -> function body(?)
-'join' -> if auto=true, check waiting=4 and create table
+'join' -> if auto=true, check waiting>=4 and create table
 'init' -> function body, setInterval, generate whenever waiting=4, set auto=true
 'pause' -> function body, clearInterval
-'create [type]' -> generate either [random] or [order] manually
+'timeout [type]' -> set auto = true/false, execute create [type]
 */
 
 const fn = {
@@ -497,13 +498,21 @@ const fn = {
     },
     'create': (target, data) => {
         // ADMIN ONLY - generate waiting tables using the current active player list
-        if (data.$me) {
-            if ($env.waiting.length >= 4) {
-                $client.say(target, $messages.system.generatingTables);
-                return utils.generateRandom(target);
+        if (data.$me && data.$tgt !== null) {
+            if (data.$tgt === '-random' || data.$tgt === '-order') {
+                if ($env.waiting.length >= 4) {
+                    $client.say(target, $messages.system.generatingTables);
+                    return utils.generateTables(data.$tgt, target);
+                } else {
+                    return $client.say(target, $messages.system.notEnoughPlayers);
+                }
             } else {
-                return $client.say(target, $messages.system.notEnoughPlayers);
+                return $client.say(target, $messages.system.targetIncorrect);
             }
+        }
+        
+        if (data.$me && data.$tgt === null) {
+            return $client.say(target, $messages.system.adminTableSortNeeded);
         }
 
         if (!data.$me) {
