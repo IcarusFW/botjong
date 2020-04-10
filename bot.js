@@ -209,9 +209,10 @@ TO DO:
 'lewds' -> update link and message object, hook into stringReplace
 'notify' -> function body(?)
 'join' -> if auto=true, check waiting>=4 and create table
-'init' -> function body, setInterval, generate whenever waiting=4, set auto=true
-'pause' -> function body, clearInterval
-'timeout [type]' -> set auto = true/false, execute create [type]
+'init' -> if set auto=true setInterval, generate whenever waiting=4
+'pause' -> clearInterval
+'timeout [on/off]' -> set timeout true/false
+'auto [on/off]' -> set auto = true/false
 */
 
 const fn = {
