@@ -26,12 +26,14 @@ All Botjong commands start with the command listed in `.env.BOT_COMMAND` followe
 - `closeready -all` : remove all tables from the waiting list
 - `closeplaying [id]` : remove a table from the playing list
 - `closeplaying -all` : remove all tables from the playing list
-- `start` : start a table
+- `start [id]` : start a table
 - `reset` : empty all tracking lists
 - `notify [id]` : notify a waiting table to start their game
 - `init` : tell bot to start tracking all commands
 - `pause` : tell bot to stop watching for all commands except `init`
-- `generate` : automatically try to create tables with the current waiting list
+- `create [-order/-random]` : automatically try to create tables with the current waiting list
+- `auto [-on/-off]` : set autogen checking flag on/off -> joining will either trigger a tablegen check or tablegen is manual
+- `type [-order/-random]` : set tablegen type flag -> order creates tables in join order, random is random, only applies when auto=true
 - `log` : output all tracking lists to `console.log()`
 
 Note that the bot has a `setInterval()` where it will automatically execute `generate` and `notify` to create tables if there are enough players in the waiting list, along with `remove [name]` to keep the list itself clean. The active games list will have an Epoch timestamp set on each generated table, and each active table will be purged once a set amount of time has elapsed, to keep things clean.

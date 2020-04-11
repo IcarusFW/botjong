@@ -17,6 +17,8 @@ $client.connect();
 
 // set up environment object
 let $env = {
+    'auto': false,
+    'type': '-order',
     'waiting': [],
     'ready': {},
     'playing': {}
@@ -80,6 +82,9 @@ const $messages = {
         'adminTableNotFound': "I could not find a table with that id...",
         'adminTableIDNeeded': "You need to provide a table id.",
         'adminTableSortNeeded': "You need to provide a table sorting type.",
+        'adminTableSortChanged': "Table sorting type: {type}",
+        'adminAutoNeeded': "You need to turn automatic generation on or off.",
+        'adminAutoChanged': "Automatic table creation: {auto}",
         'commandIncorrect': "I don't recognise that command...",
         'optionIncorrect': "I don't know that option...",
         'targetIncorrect': "I don't understand that request...",
@@ -211,8 +216,6 @@ TO DO:
 'join' -> if auto=true, check waiting>=4 and create table
 'init' -> if set auto=true setInterval, generate whenever waiting=4
 'pause' -> clearInterval
-'timeout [on/off]' -> set timeout true/false
-'auto [on/off]' -> set auto = true/false
 */
 
 const fn = {
@@ -434,25 +437,23 @@ const fn = {
     },
     'start': (target, data) => {
         // ADMIN ONLY - init game start and move to active tables, bypassing name check
-        if (data.$me) {
-            if (data.$tgt !== null) {
-                const $id = utils.findInObject($env.ready, data.$tgt);
-                if ($id) {
-                    let $obj = $env.ready[data.$tgt];
-                    utils.removeFromObject($env.ready, data.$tgt);
-                    $env.playing[data.$tgt] = $obj;
-                    setTimeout(function () {
-                        utils.removeFromObject($env.playing, data.$tgt);
-                    }, 300000); // 5mins
-                    return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
-                } else {
-                    return $client.say(target, $messages.system.tableNotFound);
-                }
+        if (data.$me && data.$tgt !== null) {
+            const $id = utils.findInObject($env.ready, data.$tgt);
+            if ($id) {
+                let $obj = $env.ready[data.$tgt];
+                utils.removeFromObject($env.ready, data.$tgt);
+                $env.playing[data.$tgt] = $obj;
+                setTimeout(function () {
+                    utils.removeFromObject($env.playing, data.$tgt);
+                }, 300000); // 5mins
+                return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
+            } else {
+                return $client.say(target, $messages.system.tableNotFound);
             }
-    
-            if (data.$tgt === null) {
-                return $client.say(target, $messages.system.targetIncorrect);
-            }
+        }
+
+        if (data.$me && data.$tgt === null) {
+            return $client.say(target, $messages.system.targetIncorrect);
         }
 
         if (!data.$me) {
@@ -519,6 +520,47 @@ const fn = {
         
         if (data.$me && data.$tgt === null) {
             return $client.say(target, $messages.system.adminTableSortNeeded);
+        }
+
+        if (!data.$me) {
+            return $client.say(target, $messages.system.adminOnly);
+        }
+    },
+    'type': (target, data) => {
+        // ADMIN ONLY - table sort type when auto -> order/random
+        if (data.$me && data.$tgt !== null) {
+            if (data.$tgt === '-random' || data.$tgt === '-order') {
+                $env.type = data.$tgt;
+                return $client.say(target, utils.replaceString($messages.system.adminTableSortChanged, { 'type': data.$tgt }));
+            } else {
+                return $client.say(target, $messages.system.targetIncorrect);
+            }
+        }
+
+        if (data.$me && data.$tgt === null) {
+            return $client.say(target, $messages.system.adminTableSortNeeded);
+        }
+
+        if (!data.$me) {
+            return $client.say(target, $messages.system.adminOnly);
+        }
+    },
+    'auto': (target, data) => {
+        // ADMIN ONLY - set autogen table if join and waiting=4, else manual tablegen
+        if (data.$me && data.$tgt !== null) {
+            if (data.$tgt === '-on') {
+                $env.auto = true;
+                return $client.say(target, utils.replaceString($messages.system.adminAutoChanged, { 'auto': 'on' }));
+            } else if (data.$tgt === '-off') {
+                $env.auto = false;
+                return $client.say(target, utils.replaceString($messages.system.adminAutoChanged, { 'auto': 'off' }));
+            } else {
+                return $client.say(target, $messages.system.targetIncorrect);
+            }
+        }
+
+        if (data.$me && data.$tgt === null) {
+            return $client.say(target, $messages.system.adminAutoNeeded);
         }
 
         if (!data.$me) {
