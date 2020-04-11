@@ -225,6 +225,9 @@ const fn = {
         const $inReady = utils.findInMatches($env.ready, data.$name);
         const $inPlaying = utils.findInMatches($env.playing, data.$name);
         let $data = { 'name': data.$name }
+        let $generate = () => {
+            return utils.generateTables($env.type, target);
+        }
 
         if ($inWaiting) {
             return $client.say(target, utils.replaceString($messages.system.onWaitingList, $data));
@@ -241,7 +244,13 @@ const fn = {
         if (!$inWaiting && !$inReady && !$inPlaying) {
             $env.waiting.push(data.$name);
             $data.total = $env.waiting.length;
-            return $client.say(target, utils.replaceString($messages.system.joinedList, $data));
+            $client.say(target, utils.replaceString($messages.system.joinedList, $data));
+
+            if ($env.waiting.length >= 4 && $env.auto === true) {
+                $client.say(target, $messages.system.generatingTables);
+                setTimeout($generate, ($timers.generate.seconds * $timers.generate.multiplier));
+                return ($timers.generate.multiplier = $timers.generate.multiplier + 1);
+            }
         }
     },
     'leave': (target, data) => {
@@ -613,9 +622,7 @@ function onMessageHandler(target, context, msg, self) {
         $client.say(target, utils.randomSelect($messages.silly));
     }
 
-    console.log('msg', $msg);
     console.log('env', $env);
-    console.log('data', $data);
 }
 
 // Called every time the bot connects to Twitch chat
