@@ -212,10 +212,8 @@ const utils = {
 /*
 TO DO:
 'lewds' -> update link and message object, hook into stringReplace
-'notify' -> function body(?)
-'join' -> if auto=true, check waiting>=4 and create table
-'init' -> if set auto=true setInterval, generate whenever waiting=4
-'pause' -> clearInterval
+'notify [id]' -> checks if player is in a ready or playing table, attaches romm number [id] to obj -> send @ to all players in TwitchChat
+'play [id]' -> remove requirement for unique ID by default, optional param [id] is MJS room number -> send @ to all players in TwitchChat 
 */
 
 const fn = {
@@ -496,18 +494,6 @@ const fn = {
     },
     'notify': (target, data) => {
         // ADMIN ONLY - send a notification to a waiting table
-        if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
-        }
-    },
-    'init': (target, data) => {
-        // ADMIN ONLY - init command watching
-        if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
-        }
-    },
-    'pause': (target, data) => {
-        // ADMIN ONLY - stop command watching (excluding !batjong init)
         if (!data.$me) {
             return $client.say(target, $messages.system.adminOnly);
         }

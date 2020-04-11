@@ -29,8 +29,6 @@ All Botjong commands start with the command listed in `.env.BOT_COMMAND` followe
 - `start [id]` : start a table
 - `reset` : empty all tracking lists
 - `notify [id]` : notify a waiting table to start their game
-- `init` : tell bot to start tracking all commands
-- `pause` : tell bot to stop watching for all commands except `init`
 - `create [-order/-random]` : automatically try to create tables with the current waiting list
 - `auto [-on/-off]` : set autogen checking flag on/off -> joining will either trigger a tablegen check or tablegen is manual
 - `type [-order/-random]` : set tablegen type flag -> order creates tables in join order, random is random, only applies when auto=true
