@@ -57,10 +57,14 @@ const $messages = {
         'reset': "All active lists have been reset.",
         'tableCreated': "A new table is ready - ID: {hash} --> players: {players}",
         'tableStarted': "The match with table ID {id} has been started.",
+        'tableStartedWithID': "The match with table ID {id} has been started. The room number for MJS is {room} -> {players}",
         'tableReady': "Ready table - ID: {hash} --> players: {players}",
         'tablePlaying': "Active table - ID: {hash} --> players: {players}",
-        'tableNotFound': "I can't find that table...",
-        'tableNotStarted': "You need to be on that table to start it.",
+        'tableNotFound': "There are no tables ready to play.",
+        'tablesNotAvailable': "There are no tables ready to play or in progress.",
+        'tableNotStarted': "You need to be on a table to start it.",
+        'tableNotNotified': "You need to be on a table to send a room notification.",
+        'sendNotification': "The room number for MJS is {room} -> {players}",
         'generatingTables': "Creating tables from current waiting list...",
         'generatingReady': "Listing tables from ready list...",
         'generatingPlaying': "Listing tables from playing list...",
@@ -145,6 +149,14 @@ const utils = {
         }
         return $temp;
     },
+    'printArrayWithAt': (obj) => {
+        let $temp = '';
+        for (let i = 0; i < obj.length; i++) {
+            $temp += (i !== 0) ? ', ' : '';
+            $temp += ('@' + obj[i]);
+        }
+        return $temp;
+    },
     'printMatches': (target, obj, message) => {
         let $data = {};
         let $index = 0;
@@ -196,7 +208,7 @@ const utils = {
                     let $hash = utils.getHash();
                     $env.ready[$hash] = $table;
                     $data.hash = $hash;
-                    $data.players = utils.printArray($env.ready[$hash]);
+                    $data.players = utils.printArrayWithAt($env.ready[$hash]);
                     setTimeout($message, ($timers.generate.seconds * $timers.generate.multiplier));
                     $timers.generate.multiplier = $timers.generate.multiplier + 1;
                     utils.generateTables(type, target);
@@ -206,14 +218,37 @@ const utils = {
             setTimeout($complete, ($timers.generate.seconds * $timers.generate.multiplier));
             return ($timers.generate.multiplier = 1);
         }
+    },
+    'startMatch': (target, data, key) => {
+        let $obj = $env.ready[key];
+        utils.removeFromObject($env.ready, key);
+        $env.playing[key] = $obj;
+        setTimeout(function () {
+            utils.removeFromObject($env.playing, key);
+        }, 300000);
+        if (data.$tgt !== null) {
+            let $data = {
+                'id': key,
+                'room': data.$tgt,
+                'players': utils.printArrayWithAt($env.playing[key])
+            }
+            return $client.say(target, utils.replaceString($messages.system.tableStartedWithID, $data));
+        } else {
+            return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': key }));
+        }
+    },
+    'sendNotification': (target, data, array, key) => {
+        let $data = {
+            'room': data.$tgt,
+            'players': utils.printArrayWithAt(array[key])
+        }
+        return $client.say(target, utils.replaceString($messages.system.sendNotification, $data));
     }
 }
 
 /*
 TO DO:
 'lewds' -> update link and message object, hook into stringReplace
-'notify [id]' -> checks if player is in a ready or playing table, attaches romm number [id] to obj -> send @ to all players in TwitchChat
-'play [id]' -> remove requirement for unique ID by default, optional param [id] is MJS room number -> send @ to all players in TwitchChat 
 */
 
 const fn = {
@@ -297,28 +332,21 @@ const fn = {
     },
     'play': (target, data) => {
         // init game start and move to active tables
-        if (data.$tgt !== null) {
-            const $id = utils.findInObject($env.ready, data.$tgt);
-            if ($id) {
-                let $player = utils.toBoolean(utils.findInArray($env.ready[data.$tgt], data.$name));
-                if ($player) {
-                    let $obj = $env.ready[data.$tgt];
-                    utils.removeFromObject($env.ready, data.$tgt);
-                    $env.playing[data.$tgt] = $obj;
-                    setTimeout(function(){
-                        utils.removeFromObject($env.playing, data.$tgt);
-                    }, 300000);
-                    return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
-                } else {
-                    return $client.say(target, $messages.system.tableNotStarted);
-                }
-            } else {
-                return $client.say(target, $messages.system.tableNotFound);
-            }
-        }
+        if ($env.ready.length !== 0) {
+            let $player = null;
+            for (let key in $env.ready) {
+                $player = utils.toBoolean(utils.findInArray($env.ready[key], data.$name));
 
-        if (data.$tgt === null) {
-            return $client.say(target, $messages.system.targetIncorrect);
+                if ($player) {
+                    return utils.startMatch(target, data, key);
+                }
+            }
+
+            if (!$player) {
+                return $client.say(target, $messages.system.tableNotStarted);
+            }
+        } else {
+            return $client.say(target, $messages.system.tableNotFound);
         }
     },
     'lewds': (target, data) => {
@@ -489,9 +517,30 @@ const fn = {
         }
     },
     'notify': (target, data) => {
-        // ADMIN ONLY - send a notification to a waiting table
-        if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
+        // send a notification to a waiting table with a room number to join
+        if ($env.ready.length !== 0) {
+            let $inReady = false;
+            let $inPlaying = false;
+
+            for (let key in $env.ready) {
+                $inReady = utils.toBoolean(utils.findInArray($env.ready[key], data.$name));
+                if ($inReady) { 
+                    return utils.sendNotification(target, data, $env.ready, key);
+                }
+            }
+
+            for (let key in $env.playing) {
+                $inPlaying = utils.toBoolean(utils.findInArray($env.playing[key], data.$name));
+                if ($inPlaying) {
+                    return utils.sendNotification(target, data, $env.playing, key);
+                }
+            }
+
+            if (!$inReady && !$inPlaying) {
+                return $client.say(target, $messages.system.tableNotNotified);
+            }
+        } else {
+            return $client.say(target, $messages.system.tablesNotAvailable);
         }
     },
     'create': (target, data) => {
