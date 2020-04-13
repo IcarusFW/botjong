@@ -11,8 +11,8 @@ All Botjong commands start with the command listed in `.env.BOT_COMMAND` followe
 ### Public Commands
 - `join` : adds your name to the waiting list
 - `leave` : removes your name from the waiting list
+- `list OR list -waiting` : displays the names of all of the waiting players
 - `list -total` : displays the total number of players on the waiting list
-- `list -waiting` : displays the names of all of the waiting players
 - `list -ready` : lists all of the tables waiting to start
 - `list -playing` :  lists all of the tables with active games
 - `play [id]` : tell the bot that table [id] has started their match

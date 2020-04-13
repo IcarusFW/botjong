@@ -265,14 +265,14 @@ const fn = {
     },
     'list': (target, data) => {
         // check waiting lists
-        if (data.$tgt === '-total') {
-            return $client.say(target, utils.replaceString($messages.system.waitingTotal, { 'total': $env.waiting.length }));
-        }
-
-        if (data.$tgt === '-waiting') {
+        if (data.$tgt === null || data.$tgt === '-waiting') {
             let $list = utils.printArray($env.waiting);
             if ($list === '') { $list = '[no players]'; }
             return $client.say(target, utils.replaceString($messages.system.waitingList, { 'list': $list }));
+        }
+
+        if (data.$tgt === '-total') {
+            return $client.say(target, utils.replaceString($messages.system.waitingTotal, { 'total': $env.waiting.length }));
         }
 
         if (data.$tgt === '-ready') {
@@ -293,10 +293,6 @@ const fn = {
             } else {
                 $client.say(target, $messages.system.noTables);
             }
-        }
-
-        if (data.$tgt === null) {
-            return $client.say(target, $messages.system.targetIncorrect);
         }
     },
     'play': (target, data) => {
