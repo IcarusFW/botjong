@@ -16,8 +16,8 @@ All Botjong commands start with the command listed in `.env.BOT_COMMAND` followe
 - `list -ready` : lists all of the tables waiting to start
 - `list -playing` :  lists all of the tables with active games
 - `play` : tell the bot to start your ready table
-- `play [id]` : tell the bot your ready table has the room number [id] and start the match
-- `notify [id]` : notify a waiting table to start their game
+- `play [room]` : tell the bot your ready table has the [room] number and start the match
+- `notify [room]` : notify a table with the MJS [room] number
 - `lewds` : randomly generate a lewd link (you perverts)
 
 ### Admin Only Commands
