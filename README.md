@@ -11,11 +11,13 @@ All Botjong commands start with the command listed in `.env.BOT_COMMAND` followe
 ### Public Commands
 - `join` : adds your name to the waiting list
 - `leave` : removes your name from the waiting list
+- `list OR list -waiting` : displays the names of all of the waiting players
 - `list -total` : displays the total number of players on the waiting list
-- `list -waiting` : displays the names of all of the waiting players
 - `list -ready` : lists all of the tables waiting to start
 - `list -playing` :  lists all of the tables with active games
-- `play [id]` : tell the bot that table [id] has started their match
+- `play` : tell the bot to start your ready table
+- `play [room]` : tell the bot your ready table has the [room] number and start the match
+- `notify [room]` : notify a table with the MJS [room] number
 - `lewds` : randomly generate a lewd link (you perverts)
 
 ### Admin Only Commands
@@ -26,14 +28,13 @@ All Botjong commands start with the command listed in `.env.BOT_COMMAND` followe
 - `closeready -all` : remove all tables from the waiting list
 - `closeplaying [id]` : remove a table from the playing list
 - `closeplaying -all` : remove all tables from the playing list
-- `start` : start a table
+- `start [id]` : start a table
 - `reset` : empty all tracking lists
-- `notify [id]` : notify a waiting table to start their game
-- `init` : tell bot to start tracking all commands
-- `pause` : tell bot to stop watching for all commands except `init`
-- `generate` : automatically try to create tables with the current waiting list
+- `create [-order/-random]` : automatically try to create tables with the current waiting list
+- `auto [-on/-off]` : set autogen checking flag on/off -> joining will either trigger a tablegen check or tablegen is manual
+- `type [-order/-random]` : set tablegen type flag -> order creates tables in join order, random is random, only applies when auto=true
 - `log` : output all tracking lists to `console.log()`
 
-Note that the bot has a `setInterval()` where it will automatically execute `generate` and `notify` to create tables if there are enough players in the waiting list, along with `remove [name]` to keep the list itself clean. The active games list will have an Epoch timestamp set on each generated table, and each active table will be purged once a set amount of time has elapsed, to keep things clean.
+This bot, when set to `auto -on`, will check the number of players joining, and when there is enough for a table, will automatically generate the table. `auto` can be turned `-off`, and table generation can be done manually if a `-random` sorting order is preferred - this is good for large groups of players starting matches at the same time. Waiting room size check may be command-set in the future to determine what size the waiting room should be at before automatic table generation is triggered.
 
 The intention for this bot is to track any waiting players and automatically create a table ID once there is enough to make a table. As there is no way to hook into MJS to create a table and assign player IDs, all table creation must be handled manually - the bot is for tracking players and games only. Players _must_ reregister for a match whenever they are ready, and `leave` if they no longer wish to be tracked for a match.

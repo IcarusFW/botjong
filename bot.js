@@ -17,6 +17,8 @@ $client.connect();
 
 // set up environment object
 let $env = {
+    'auto': false,
+    'type': '-order',
     'waiting': [],
     'ready': {},
     'playing': {}
@@ -43,44 +45,63 @@ const $pervert = [
 
 const $messages = {
     'system': {
-        'adminOnly': "That's an admin-only command.",
-        'joinedList': "@{name} has joined the waiting list. There are {total} players awaiting a game.",
-        'onWaitingList': "@{name}, you're already on the waiting list.",
-        'onReadyList': "@{name}, you're already on a waiting table.",
-        'onPlayingList': "@{name}, you're already in a game.",
-        'leftList': "@{name} has left the waiting list. There are {total} players awaiting a game.",
-        'notOnList': "@{name}, you're not on the waiting list.",
-        'waitingTotal': "There are currently {total} players waiting for a match.",
-        'waitingList': "Players awaiting a match - {list}",
-        'reset': "All active lists have been reset.",
-        'tableCreated': "A new table is ready - ID: {hash} --> players: {players}",
-        'tableStarted': "The match with table ID {id} has been started.",
-        'tableReady': "Ready table - ID: {hash} --> players: {players}",
-        'tablePlaying': "Active table - ID: {hash} --> players: {players}",
-        'tableNotFound': "I can't find that table...",
-        'tableNotStarted': "You need to be on that table to start it.",
-        'generatingTables': "Creating tables from current waiting list...",
-        'generatingReady': "Listing tables from ready list...",
-        'generatingPlaying': "Listing tables from playing list...",
-        'noTables': "There are no tables in that list.",
-        'notEnoughPlayers': "There are not enough players waiting to create a table.",
-        'adminAdd': "@{name} has been added to the waiting list. There are {total} players awaiting a game.",
-        'adminAddName': "You need to provide a player name to add to the list.",
-        'adminOnWaitingList': "@{name} is already on the waiting list.",
-        'adminOnReadyList': "@{name} is already on a waiting table.",
-        'adminOnPlayingList': "@{name} is already in a game.",
-        'adminRemove': "@{name} has been removed from the waiting list. There are {total} players awaiting a game.",
-        'adminRemoveName': "You need to provide a player name to remove from the list.",
-        'adminNotOnList': "@{name} is not on the waiting list.",
-        'adminAllWaitingClosed': "All players removed from the waiting list.",
-        'adminAllReadyClosed': "All waiting tables have been closed.",
-        'adminAllPlayingClosed': "All playing tables have been closed.",
-        'adminTableClosed': "The table with id: {id} has been closed.",
-        'adminTableNotFound': "I could not find a table with that id...",
-        'adminTableIDNeeded': "You need to provide a table id.",
-        'commandIncorrect': "I don't recognise that command...",
-        'optionIncorrect': "I don't know that option...",
-        'targetIncorrect': "I don't understand that request...",
+        'players': {
+            'joining': "@{name} has joined the waiting list. There are {total} players awaiting a game.",
+            'onWaiting': "@{name}, you're already on the waiting list.",
+            'onReady': "@{name}, you're already on a waiting table.",
+            'onPlaying': "@{name}, you're already in a game.",
+            'leaving': "@{name} has left the waiting list. There are {total} players awaiting a game.",
+            'notOnList': "@{name}, you're not on the waiting list."
+        },
+        'tables': {
+            'generatingTables': "Creating tables from current waiting list...",
+            'generatingComplete': "Table generation completed. There are {total} unsorted players still waiting.",
+            'tableCreated': "A new table is ready - ID: {hash} --> players: {players}",
+            'tableStarted': "The match with table ID {id} has been started.",
+            'tableStartedWithID': "The match with table ID {id} has been started. The room number for MJS is {room} -> {players}",
+            'tableNotFound': "There are no tables ready to play.",
+            'tablesNotAvailable': "There are no tables ready to play or in progress.",
+            'tableNotStarted': "You need to be on a table to start it.",
+            'tableNotNotified': "You need to be on a table to send a room notification.",
+            'sendNotification': "The room number for MJS is {room} -> {players}",
+            'notEnoughPlayers': "There are not enough players waiting to create a table."
+        },
+        'list': {
+            'waitingTotal': "There are currently {total} players waiting for a match.",
+            'waitingList': "Players awaiting a match - {list}",
+            'generatingReady': "Listing tables from ready list...",
+            'tableReady': "Ready table - ID: {hash} --> players: {players}",
+            'generatingPlaying': "Listing tables from playing list...",
+            'tablePlaying': "Active table - ID: {hash} --> players: {players}",
+            'noTables': "There are no tables in that list."
+        },
+        'admin': {
+            'reset': "All active lists have been reset.",
+            'adminAdd': "@{name} has been added to the waiting list. There are {total} players awaiting a game.",
+            'adminAddName': "You need to provide a player name to add to the list.",
+            'adminOnWaitingList': "@{name} is already on the waiting list.",
+            'adminOnReadyList': "@{name} is already on a waiting table.",
+            'adminOnPlayingList': "@{name} is already in a game.",
+            'adminRemove': "@{name} has been removed from the waiting list. There are {total} players awaiting a game.",
+            'adminRemoveName': "You need to provide a player name to remove from the list.",
+            'adminNotOnList': "@{name} is not on the waiting list.",
+            'adminAllWaitingClosed': "All players removed from the waiting list.",
+            'adminAllReadyClosed': "All waiting tables have been closed.",
+            'adminAllPlayingClosed': "All playing tables have been closed.",
+            'adminTableClosed': "The table with id: {id} has been closed.",
+            'adminTableNotFound': "I could not find a table with that id...",
+            'adminTableIDNeeded': "You need to provide a table id.",
+            'adminTableSortNeeded': "You need to provide a table sorting type.",
+            'adminTableSortChanged': "Table sorting type: {type}",
+            'adminAutoNeeded': "You need to turn automatic generation on or off.",
+            'adminAutoChanged': "Automatic table creation: {auto}"
+        },
+        'error': {
+            'adminOnly': "That's an admin-only command.",
+            'commandIncorrect': "I don't recognise that command...",
+            'optionIncorrect': "I don't know that option...",
+            'targetIncorrect': "I don't understand that request..."
+        }
     },
     'silly': [
         'BatJong I am the night.',
@@ -91,9 +112,11 @@ const $messages = {
         'BatJong You either deal-in a hero, or you live long enough to see yourself become the drawn game.',
         'BatJong You’re not the yakuman. You’re practice.',
         'BatJong Riichis frighten me. It’s time the world shared my dread.',
+        'BatJong I have no yaku, but I must pon.',
         'PonChamp',
         'Chiisus',
-        'YesWeKan'
+        'YesWeKan',
+        'AngryMiku'
     ]
 }
 
@@ -137,6 +160,14 @@ const utils = {
         }
         return $temp;
     },
+    'printArrayWithAt': (obj) => {
+        let $temp = '';
+        for (let i = 0; i < obj.length; i++) {
+            $temp += (i !== 0) ? ', ' : '';
+            $temp += ('@' + obj[i]);
+        }
+        return $temp;
+    },
     'printMatches': (target, obj, message) => {
         let $data = {};
         let $index = 0;
@@ -167,17 +198,20 @@ const utils = {
     'randomSelect': (arr) => {
         return arr[Math.floor(Math.random() * arr.length)]
     },
-    'generateTables': (target) => {
+    'generateTables': (type, target) => {
         let $data = {};
         let $target = target;
         let $message = () => {
-            $client.say($target, utils.replaceString($messages.system.tableCreated, $data))
+            $client.say($target, utils.replaceString($messages.system.tables.tableCreated, $data))
+        }
+        let $complete = () => {
+            $client.say(target, utils.replaceString($messages.system.tables.generatingComplete, { 'total': $env.waiting.length }));
         }
 
         if ($env.waiting.length >= 4) {
             let $table = [];
             for (let i = 1; i <= 4; i++) {
-                let $name = utils.randomSelect($env.waiting);
+                let $name = (type === '-order') ? $env.waiting[0] : utils.randomSelect($env.waiting);
                 $table.push($name);
                 $env.waiting = utils.removeFromArray($env.waiting, $name);
 
@@ -185,25 +219,47 @@ const utils = {
                     let $hash = utils.getHash();
                     $env.ready[$hash] = $table;
                     $data.hash = $hash;
-                    $data.players = utils.printArray($env.ready[$hash]);
+                    $data.players = utils.printArrayWithAt($env.ready[$hash]);
                     setTimeout($message, ($timers.generate.seconds * $timers.generate.multiplier));
                     $timers.generate.multiplier = $timers.generate.multiplier + 1;
-                    utils.generateTables(target);
+                    utils.generateTables(type, target);
                 }
             }
         } else {
+            setTimeout($complete, ($timers.generate.seconds * $timers.generate.multiplier));
             return ($timers.generate.multiplier = 1);
         }
+    },
+    'startMatch': (target, data, key) => {
+        let $obj = $env.ready[key];
+        utils.removeFromObject($env.ready, key);
+        $env.playing[key] = $obj;
+        setTimeout(function () {
+            utils.removeFromObject($env.playing, key);
+        }, 300000);
+        if (data.$tgt !== null) {
+            let $data = {
+                'id': key,
+                'room': data.$tgt,
+                'players': utils.printArrayWithAt($env.playing[key])
+            }
+            return $client.say(target, utils.replaceString($messages.system.tables.tableStartedWithID, $data));
+        } else {
+            return $client.say(target, utils.replaceString($messages.system.tables.tableStarted, { 'id': key }));
+        }
+    },
+    'sendNotification': (target, data, array, key) => {
+        let $data = {
+            'room': data.$tgt,
+            'players': utils.printArrayWithAt(array[key])
+        }
+        return $client.say(target, utils.replaceString($messages.system.tables.sendNotification, $data));
     }
 }
 
 /*
 TO DO:
 'lewds' -> update link and message object, hook into stringReplace
-'notify' -> function body(?)
-'init' -> function body(?)
-'pause' -> function body(?)
-'generate' -> add notify setInterval? will need clearInterval tied to table ID on 'play [id]' command
 */
 
 const fn = {
@@ -213,23 +269,32 @@ const fn = {
         const $inReady = utils.findInMatches($env.ready, data.$name);
         const $inPlaying = utils.findInMatches($env.playing, data.$name);
         let $data = { 'name': data.$name }
+        let $generate = () => {
+            return utils.generateTables($env.type, target);
+        }
 
         if ($inWaiting) {
-            return $client.say(target, utils.replaceString($messages.system.onWaitingList, $data));
+            return $client.say(target, utils.replaceString($messages.system.players.onWaiting, $data));
         }
 
         if ($inReady) {
-            return $client.say(target, utils.replaceString($messages.system.onReadyList, $data));
+            return $client.say(target, utils.replaceString($messages.system.players.onReady, $data));
         }
 
         if ($inPlaying) {
-            return $client.say(target, utils.replaceString($messages.system.onPlayingList, $data));
+            return $client.say(target, utils.replaceString($messages.system.players.onPlaying, $data));
         }
 
         if (!$inWaiting && !$inReady && !$inPlaying) {
             $env.waiting.push(data.$name);
             $data.total = $env.waiting.length;
-            return $client.say(target, utils.replaceString($messages.system.joinedList, $data));
+            $client.say(target, utils.replaceString($messages.system.players.joining, $data));
+
+            if ($env.waiting.length >= 4 && $env.auto === true) {
+                $client.say(target, $messages.system.tables.generatingTables);
+                setTimeout($generate, ($timers.generate.seconds * $timers.generate.multiplier));
+                return ($timers.generate.multiplier = $timers.generate.multiplier + 1);
+            }
         }
     },
     'leave': (target, data) => {
@@ -239,71 +304,60 @@ const fn = {
         if ($player) {
             $env.waiting = utils.removeFromArray($env.waiting, data.$name);
             $data.total = $env.waiting.length;
-            return $client.say(target, utils.replaceString($messages.system.leftList, $data));
+            return $client.say(target, utils.replaceString($messages.system.players.leaving, $data));
         } else {
-            return $client.say(target, utils.replaceString($messages.system.notOnList, $data));
+            return $client.say(target, utils.replaceString($messages.system.players.notOnList, $data));
         }
     },
     'list': (target, data) => {
         // check waiting lists
-        if (data.$tgt === '-total') {
-            return $client.say(target, utils.replaceString($messages.system.waitingTotal, { 'total': $env.waiting.length }));
-        }
-
-        if (data.$tgt === '-waiting') {
+        if (data.$tgt === null || data.$tgt === '-waiting') {
             let $list = utils.printArray($env.waiting);
             if ($list === '') { $list = '[no players]'; }
-            return $client.say(target, utils.replaceString($messages.system.waitingList, { 'list': $list }));
+            return $client.say(target, utils.replaceString($messages.system.list.waitingList, { 'list': $list }));
+        }
+
+        if (data.$tgt === '-total') {
+            return $client.say(target, utils.replaceString($messages.system.list.waitingTotal, { 'total': $env.waiting.length }));
         }
 
         if (data.$tgt === '-ready') {
             let $size = Object.keys($env.ready).length;
             if ($size !== 0) {
-                $client.say(target, $messages.system.generatingReady);
-                return utils.printMatches(target, $env.ready, $messages.system.tableReady);
+                $client.say(target, $messages.system.list.generatingReady);
+                return utils.printMatches(target, $env.ready, $messages.system.list.tableReady);
             } else {
-                $client.say(target, $messages.system.noTables);
+                $client.say(target, $messages.system.list.noTables);
             } 
         }
 
         if (data.$tgt === '-playing') {
             let $size = Object.keys($env.playing).length;
             if ($size !== 0) {
-                $client.say(target, $messages.system.generatingPlaying);
-                return utils.printMatches(target, $env.playing, $messages.system.tablePlaying);
+                $client.say(target, $messages.system.list.generatingPlaying);
+                return utils.printMatches(target, $env.playing, $messages.system.list.tablePlaying);
             } else {
-                $client.say(target, $messages.system.noTables);
+                $client.say(target, $messages.system.list.noTables);
             }
-        }
-
-        if (data.$tgt === null) {
-            return $client.say(target, $messages.system.targetIncorrect);
         }
     },
     'play': (target, data) => {
         // init game start and move to active tables
-        if (data.$tgt !== null) {
-            const $id = utils.findInObject($env.ready, data.$tgt);
-            if ($id) {
-                let $player = utils.toBoolean(utils.findInArray($env.ready[data.$tgt], data.$name));
-                if ($player) {
-                    let $obj = $env.ready[data.$tgt];
-                    utils.removeFromObject($env.ready, data.$tgt);
-                    $env.playing[data.$tgt] = $obj;
-                    setTimeout(function(){
-                        utils.removeFromObject($env.playing, data.$tgt);
-                    }, 300000);
-                    return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
-                } else {
-                    return $client.say(target, $messages.system.tableNotStarted);
-                }
-            } else {
-                return $client.say(target, $messages.system.tableNotFound);
-            }
-        }
+        if ($env.ready.length !== 0) {
+            let $player = null;
+            for (let key in $env.ready) {
+                $player = utils.toBoolean(utils.findInArray($env.ready[key], data.$name));
 
-        if (data.$tgt === null) {
-            return $client.say(target, $messages.system.targetIncorrect);
+                if ($player) {
+                    return utils.startMatch(target, data, key);
+                }
+            }
+
+            if (!$player) {
+                return $client.say(target, $messages.system.tables.tableNotStarted);
+            }
+        } else {
+            return $client.say(target, $messages.system.tables.tableNotFound);
         }
     },
     'lewds': (target, data) => {
@@ -318,30 +372,30 @@ const fn = {
             let $data = { 'name': data.$tgt }
 
             if ($inWaiting) {
-                return $client.say(target, utils.replaceString($messages.system.adminOnWaitingList, $data));
+                return $client.say(target, utils.replaceString($messages.system.admin.adminOnWaitingList, $data));
             }
 
             if ($inReady) {
-                return $client.say(target, utils.replaceString($messages.system.adminOnReadyList, $data));
+                return $client.say(target, utils.replaceString($messages.system.admin.adminOnReadyList, $data));
             }
 
             if ($inPlaying) {
-                return $client.say(target, utils.replaceString($messages.system.adminOnPlayingList, $data));
+                return $client.say(target, utils.replaceString($messages.system.admin.adminOnPlayingList, $data));
             }
 
             if (!$inWaiting && !$inReady && !$inPlaying) {
                 $env.waiting.push(data.$tgt);
                 $data.total = $env.waiting.length;
-                return $client.say(target, utils.replaceString($messages.system.adminAdd, $data));
+                return $client.say(target, utils.replaceString($messages.system.admin.adminAdd, $data));
             }
         }
 
         if (data.$me && data.$tgt === null) {
-            return $client.say(target, $messages.system.adminAddName);
+            return $client.say(target, $messages.system.admin.adminAddName);
         }
 
         if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
+            return $client.say(target, $messages.system.error.adminOnly);
         }
     },
     'remove': (target, data) => {
@@ -349,26 +403,26 @@ const fn = {
         if (data.$me && data.$tgt !== null) {
             if (data.$tgt === '-all') {
                 $env.waiting = [];
-                return $client.say(target, $messages.system.adminAllWaitingClosed);
+                return $client.say(target, $messages.system.admin.adminAllWaitingClosed);
             } else {
                 const $player = utils.toBoolean(utils.findInArray($env.waiting, data.$tgt));
                 let $data = { 'name': data.$tgt }
                 if ($player) {
                     $env.waiting = utils.removeFromArray($env.waiting, data.$tgt);
                     $data.total = $env.waiting.length;
-                    return $client.say(target, utils.replaceString($messages.system.adminRemove, $data));
+                    return $client.say(target, utils.replaceString($messages.system.admin.adminRemove, $data));
                 } else {
-                    return $client.say(target, utils.replaceString($messages.system.adminNotOnList, $data));
+                    return $client.say(target, utils.replaceString($messages.system.admin.adminNotOnList, $data));
                 }
             }
         }
 
         if (data.$me && data.$tgt === null) {
-            return $client.say(target, $messages.system.adminRemoveName);
+            return $client.say(target, $messages.system.admin.adminRemoveName);
         }
 
         if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
+            return $client.say(target, $messages.system.error.adminOnly);
         }
     },
     'closeready': (target, data) => {
@@ -376,25 +430,25 @@ const fn = {
         if (data.$me && data.$tgt !== null) {
             if (data.$tgt === '-all') {
                 $env.ready = {};
-                return $client.say(target, $messages.system.adminAllReadyClosed);
+                return $client.say(target, $messages.system.admin.adminAllReadyClosed);
             } else {
                 const $inReady = utils.findInObject($env.ready, data.$tgt);
                 if ($inReady) {
                     let $data = { 'id': data.$tgt };
                     utils.removeFromObject($env.ready, data.$tgt);
-                    return $client.say(target, utils.replaceString($messages.system.adminTableClosed, $data));
+                    return $client.say(target, utils.replaceString($messages.system.admin.adminTableClosed, $data));
                 } else {
-                    return $client.say(target, $messages.system.adminTableNotFound);
+                    return $client.say(target, $messages.system.admin.adminTableNotFound);
                 }
             }
         }
 
         if (data.$me && data.$tgt !== null) {
-            return $client.say(target, $messages.system.adminTableIDNeeded);
+            return $client.say(target, $messages.system.admin.adminTableIDNeeded);
         }
 
         if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
+            return $client.say(target, $messages.system.error.adminOnly);
         }
     },
     'closeplaying': (target, data) => {
@@ -402,52 +456,50 @@ const fn = {
         if (data.$me && data.$tgt !== null) {
             if (data.$tgt === '-all') {
                 $env.playing = {};
-                return $client.say(target, $messages.system.adminAllPlayingClosed);
+                return $client.say(target, $messages.system.admin.adminAllPlayingClosed);
             } else {
                 const $inPlaying = utils.findInObject($env.playing, data.$tgt);
                 if ($inPlaying) {
                     let $data = { 'id': data.$tgt };
                     utils.removeFromObject($env.playing, data.$tgt);
-                    return $client.say(target, utils.replaceString($messages.system.adminTableClosed, $data));
+                    return $client.say(target, utils.replaceString($messages.system.admin.adminTableClosed, $data));
                 } else {
-                    return $client.say(target, $messages.system.adminTableNotFound);
+                    return $client.say(target, $messages.system.admin.adminTableNotFound);
                 }
             }
         }
 
         if (data.$me && data.$tgt !== null) {
-            return $client.say(target, $messages.system.adminTableIDNeeded);
+            return $client.say(target, $messages.system.admin.adminTableIDNeeded);
         }
 
         if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
+            return $client.say(target, $messages.system.error.adminOnly);
         }
     },
     'start': (target, data) => {
         // ADMIN ONLY - init game start and move to active tables, bypassing name check
-        if (data.$me) {
-            if (data.$tgt !== null) {
-                const $id = utils.findInObject($env.ready, data.$tgt);
-                if ($id) {
-                    let $obj = $env.ready[data.$tgt];
-                    utils.removeFromObject($env.ready, data.$tgt);
-                    $env.playing[data.$tgt] = $obj;
-                    setTimeout(function () {
-                        utils.removeFromObject($env.playing, data.$tgt);
-                    }, 300000);
-                    return $client.say(target, utils.replaceString($messages.system.tableStarted, { 'id': data.$tgt }));
-                } else {
-                    return $client.say(target, $messages.system.tableNotFound);
-                }
-            }
-    
-            if (data.$tgt === null) {
-                return $client.say(target, $messages.system.targetIncorrect);
+        if (data.$me && data.$tgt !== null) {
+            const $id = utils.findInObject($env.ready, data.$tgt);
+            if ($id) {
+                let $obj = $env.ready[data.$tgt];
+                utils.removeFromObject($env.ready, data.$tgt);
+                $env.playing[data.$tgt] = $obj;
+                setTimeout(function () {
+                    utils.removeFromObject($env.playing, data.$tgt);
+                }, 300000); // 5mins
+                return $client.say(target, utils.replaceString($messages.system.tables.tableStarted, { 'id': data.$tgt }));
+            } else {
+                return $client.say(target, $messages.system.tables.tableNotFound);
             }
         }
 
+        if (data.$me && data.$tgt === null) {
+            return $client.say(target, $messages.system.error.targetIncorrect);
+        }
+
         if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
+            return $client.say(target, $messages.system.error.adminOnly);
         }
     },
     'reset': (target, data) => {
@@ -464,48 +516,106 @@ const fn = {
                 },
                 'list': {
                     'seconds': 1500,
-                    'multiplier': 1
+                    'multiplier': 0
                 }
             }
 
-            return $client.say(target, $messages.system.reset);
+            return $client.say(target, $messages.system.admin.reset);
         }
 
         if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
+            return $client.say(target, $messages.system.error.adminOnly);
         }
     },
     'notify': (target, data) => {
-        // ADMIN ONLY - send a notification to a waiting table
-        if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
-        }
-    },
-    'init': (target, data) => {
-        // ADMIN ONLY - init command watching
-        if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
-        }
-    },
-    'pause': (target, data) => {
-        // ADMIN ONLY - stop command watching (excluding !batjong init)
-        if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
-        }
-    },
-    'generate': (target, data) => {
-        // ADMIN ONLY - generate waiting tables using the current active player list
-        if (data.$me) {
-            if ($env.waiting.length >= 4) {
-                $client.say(target, $messages.system.generatingTables);
-                return utils.generateTables(target);
-            } else {
-                return $client.say(target, $messages.system.notEnoughPlayers);
+        // send a notification to a waiting table with a room number to join
+        if ($env.ready.length !== 0) {
+            let $inReady = false;
+            let $inPlaying = false;
+
+            for (let key in $env.ready) {
+                $inReady = utils.toBoolean(utils.findInArray($env.ready[key], data.$name));
+                if ($inReady) { 
+                    return utils.sendNotification(target, data, $env.ready, key);
+                }
             }
+
+            for (let key in $env.playing) {
+                $inPlaying = utils.toBoolean(utils.findInArray($env.playing[key], data.$name));
+                if ($inPlaying) {
+                    return utils.sendNotification(target, data, $env.playing, key);
+                }
+            }
+
+            if (!$inReady && !$inPlaying) {
+                return $client.say(target, $messages.system.tables.tableNotNotified);
+            }
+        } else {
+            return $client.say(target, $messages.system.tables.tablesNotAvailable);
+        }
+    },
+    'create': (target, data) => {
+        // ADMIN ONLY - generate waiting tables using the current active player list
+        if (data.$me && data.$tgt !== null) {
+            if (data.$tgt === '-random' || data.$tgt === '-order') {
+                if ($env.waiting.length >= 4) {
+                    $client.say(target, $messages.system.tables.generatingTables);
+                    return utils.generateTables(data.$tgt, target);
+                } else {
+                    return $client.say(target, $messages.system.tables.notEnoughPlayers);
+                }
+            } else {
+                return $client.say(target, $messages.system.error.targetIncorrect);
+            }
+        }
+        
+        if (data.$me && data.$tgt === null) {
+            return $client.say(target, $messages.system.admin.adminTableSortNeeded);
         }
 
         if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
+            return $client.say(target, $messages.system.error.adminOnly);
+        }
+    },
+    'type': (target, data) => {
+        // ADMIN ONLY - table sort type when auto -> order/random
+        if (data.$me && data.$tgt !== null) {
+            if (data.$tgt === '-random' || data.$tgt === '-order') {
+                $env.type = data.$tgt;
+                return $client.say(target, utils.replaceString($messages.system.admin.adminTableSortChanged, { 'type': data.$tgt }));
+            } else {
+                return $client.say(target, $messages.system.error.targetIncorrect);
+            }
+        }
+
+        if (data.$me && data.$tgt === null) {
+            return $client.say(target, $messages.system.admin.adminTableSortNeeded);
+        }
+
+        if (!data.$me) {
+            return $client.say(target, $messages.system.error.adminOnly);
+        }
+    },
+    'auto': (target, data) => {
+        // ADMIN ONLY - set autogen table if join and waiting=4, else manual tablegen
+        if (data.$me && data.$tgt !== null) {
+            if (data.$tgt === '-on') {
+                $env.auto = true;
+                return $client.say(target, utils.replaceString($messages.system.admin.adminAutoChanged, { 'auto': 'on' }));
+            } else if (data.$tgt === '-off') {
+                $env.auto = false;
+                return $client.say(target, utils.replaceString($messages.system.admin.adminAutoChanged, { 'auto': 'off' }));
+            } else {
+                return $client.say(target, $messages.system.error.targetIncorrect);
+            }
+        }
+
+        if (data.$me && data.$tgt === null) {
+            return $client.say(target, $messages.system.admin.adminAutoNeeded);
+        }
+
+        if (!data.$me) {
+            return $client.say(target, $messages.system.error.adminOnly);
         }
     },
     'log': (target, data) => {
@@ -518,7 +628,7 @@ const fn = {
         }
 
         if (!data.$me) {
-            return $client.say(target, $messages.system.adminOnly);
+            return $client.say(target, $messages.system.error.adminOnly);
         }
     }
 }
@@ -548,15 +658,13 @@ function onMessageHandler(target, context, msg, self) {
         if (typeof fn[$data.$opt] !== 'undefined') {
             fn[$data.$opt](target, $data);
         } else {
-            $client.say(target, $messages.system.commandIncorrect);
+            $client.say(target, $messages.system.error.commandIncorrect);
         }
     } else if ($data.$cmd === process.env.BOT_COMMAND && $data.$opt === null) {
         $client.say(target, utils.randomSelect($messages.silly));
     }
 
-    console.log('msg', $msg);
     console.log('env', $env);
-    console.log('data', $data);
 }
 
 // Called every time the bot connects to Twitch chat
