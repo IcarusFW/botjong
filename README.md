@@ -9,7 +9,7 @@ For this to be functional, a `.env` file with the parameters `BOT_USERNAME`, `BO
 All Botjong commands start with the command listed in `.env.BOT_COMMAND` followed by a request and an optional target. 
 
 ### Public Commands
-- `join` : adds your name to the waiting list
+- `join` : adds your name to the waiting list - you can also use `!batjoin` as a shortcut
 - `leave` : removes your name from the waiting list
 - `list OR list -waiting` : displays the names of all of the waiting players
 - `list -total` : displays the total number of players on the waiting list
@@ -18,7 +18,7 @@ All Botjong commands start with the command listed in `.env.BOT_COMMAND` followe
 - `play` : tell the bot to start your ready table
 - `play [room]` : tell the bot your ready table has the [room] number and start the match
 - `notify [room]` : notify a table with the MJS [room] number
-- `lewds` : randomly generate a lewd link (you perverts)
+- `lewds` : randomly generate a lewd link (you perverts) - invisible timer controlled to avoid link spam
 
 ### Admin Only Commands
 - `add [name]` : add a player to the waiting list

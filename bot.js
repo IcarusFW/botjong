@@ -35,13 +35,23 @@ let $timers = {
     }
 }
 
-const $pervert = [
-    'https://www.reddit.com/r/rule34/',
-    'https://exhentai.org',
-    'https://e-hentai.org',
-    'https://www.pixiv.net/tags/R-18',
-    'https://nhentai.net'
-]
+const $pervert = {
+    'timer': false,
+    'message': [
+        'BatJong {link} - and keep the change, you filthy animal.'
+    ],
+    'links': [
+        'https://www.reddit.com/r/rule34/',
+        'https://exhentai.org',
+        'https://e-hentai.org',
+        'https://www.pixiv.net/tags/R-18',
+        'https://nhentai.net',
+        'https://www.fakku.net/',
+        'https://hentairead.com/',
+        'https://hentaifox.com/',
+        'https://9hentai.com/'
+    ]
+}
 
 const $messages = {
     'system': {
@@ -257,11 +267,6 @@ const utils = {
     }
 }
 
-/*
-TO DO:
-'lewds' -> update link and message object, hook into stringReplace
-*/
-
 const fn = {
     'join': (target, data) => {
         // sign into waiting list to play
@@ -362,6 +367,15 @@ const fn = {
     },
     'lewds': (target, data) => {
         // post lewds lmao
+        if ($pervert.timer === false) {
+            $pervert.timer = true;
+            const $message = utils.randomSelect($pervert.message);
+            const $link = utils.randomSelect($pervert.links);
+            setTimeout(function () {
+                $pervert.timer = false;
+            }, 900000);
+            return $client.say(target, utils.replaceString($message, {'link': $link}));
+        }
     },
     'add': (target, data) => {
         // ADMIN ONLY - manually add a player to the waiting list
@@ -660,6 +674,9 @@ function onMessageHandler(target, context, msg, self) {
         } else {
             $client.say(target, $messages.system.error.commandIncorrect);
         }
+    } else if ($data.$cmd === '!batjoin') {
+        // joining command shortcut
+        fn.join(target, $data);
     } else if ($data.$cmd === process.env.BOT_COMMAND && $data.$opt === null) {
         $client.say(target, utils.randomSelect($messages.silly));
     }
