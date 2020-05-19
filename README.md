@@ -19,6 +19,7 @@ All Botjong commands start with the command listed in `.env.BOT_COMMAND` followe
 - `play [room]` : tell the bot your ready table has the [room] number and start the match
 - `notify [room]` : notify a table with the MJS [room] number
 - `lewds` : randomly generate a lewd link (you perverts) - invisible timer controlled to avoid link spam
+- `help` : returns a link to a list of commands for this bot
 
 ### Admin Only Commands
 - `add [name]` : add a player to the waiting list

@@ -111,6 +111,9 @@ const $messages = {
             'commandIncorrect': "I don't recognise that command...",
             'optionIncorrect': "I don't know that option...",
             'targetIncorrect': "I don't understand that request..."
+        },
+        'other': {
+            'help': "You can find a list of !batjong commands at https://github.com/IcarusFW/botjong"
         }
     },
     'silly': [
@@ -644,6 +647,9 @@ const fn = {
         if (!data.$me) {
             return $client.say(target, $messages.system.error.adminOnly);
         }
+    },
+    'help': (target, data) => {
+        return $client.say(target, $messages.system.other.help);
     }
 }
 
