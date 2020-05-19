@@ -457,7 +457,7 @@ const fn = {
             }
         }
 
-        if (data.$me && data.$tgt !== null) {
+        if (data.$me && data.$tgt === null) {
             return $client.say(target, $messages.system.admin.adminTableIDNeeded);
         }
 
@@ -483,7 +483,7 @@ const fn = {
             }
         }
 
-        if (data.$me && data.$tgt !== null) {
+        if (data.$me && data.$tgt === null) {
             return $client.say(target, $messages.system.admin.adminTableIDNeeded);
         }
 
