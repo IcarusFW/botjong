@@ -17,7 +17,7 @@ $client.connect();
 
 // set up environment object
 let $env = {
-    'auto': false,
+    'auto': true,
     'type': '-order',
     'waiting': [],
     'ready': {},
@@ -113,7 +113,7 @@ const $messages = {
             'targetIncorrect': "I don't understand that request..."
         },
         'other': {
-            'help': "You can find a list of !batjong commands at https://github.com/IcarusFW/botjong"
+            'help': "Join the waiting list with '!batjoin' or '!batjong join'. Leave the list with '!batjong leave'. Start a match with '!batjong play [room number]' (no square brackets). Other bot commands at https://github.com/IcarusFW/botjong"
         }
     },
     'silly': [
@@ -126,6 +126,7 @@ const $messages = {
         'BatJong You’re not the yakuman. You’re practice.',
         'BatJong Riichis frighten me. It’s time the world shared my dread.',
         'BatJong I have no yaku, but I must pon.',
+        'BatJong Memes never die, they just get postponed to a future match.',
         'PonChamp',
         'Chiisus',
         'YesWeKan',
